@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi-Dataset Recommender Demo</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>多数据集推荐 Demo</h1>
+    <p class="subtitle">支持在 MovieLens-1M 和 Amazon Musical Instruments 之间切换，并使用 SASRec、LightGCN、Mult-VAE 推荐。</p>
+
+    <section class="toolbar">
+      <label for="datasetSelect">数据集</label>
+      <select id="datasetSelect">
+        <option value="ml1m">MovieLens-1M</option>
+        <option value="amazon_mi">Amazon Musical Instruments</option>
+      </select>
+
+      <label for="algoSelect">推理模型</label>
+      <select id="algoSelect">
+        <option value="sasrec">SASRec</option>
+        <option value="lightgcn">LightGCN</option>
+        <option value="multvae">Mult-VAE</option>
+      </select>
+      <button id="resetBtn" type="button">随机重置</button>
+      <button id="nextBtn" type="button">下一页</button>
+      <span id="statusText">加载中...</span>
+    </section>
+
+    <section id="grid" class="grid"></section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

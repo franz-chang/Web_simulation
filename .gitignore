@@ -1,0 +1,12 @@
+# OS / Python cache
+.DS_Store
+__pycache__/
+*.pyc
+
+# Runtime logs
+*.log
+*.pid
+web.log
+
+# Training artifacts (large binaries)
+artifacts/*.pt

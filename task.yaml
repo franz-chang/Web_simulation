@@ -1,0 +1,9 @@
+dataset:
+  - MovieLens-1M
+  - Amazon Musical Instruments
+model:
+  - SASRec
+  - LIghtGCN
+  - Multi-VAE
+track: 100
+agent_num: 100
