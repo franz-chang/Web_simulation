@@ -2,9 +2,11 @@
 
 ## 0. 数据集准备
 
-请新建一个和 Web_simulation平级的目录： WebSim_Dataset. 所需的数据集在：https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing.
+请新建一个和 Web_simulation平级的目录： WebSim_Dataset. 所需的数据集在：
+https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing.
 
-预训练好的SASRec, Multi-VAE, LightGCN在：https://drive.google.com/drive/folders/1Av0ly-myQlt2e-II9j4B0x5PBFqsTGW3?usp=sharing
+预训练好的SASRec, Multi-VAE, LightGCN在：
+https://drive.google.com/drive/folders/1Av0ly-myQlt2e-II9j4B0x5PBFqsTGW3?usp=sharing
 
 ## 1. 训练模型（MovieLens-1M）
 
