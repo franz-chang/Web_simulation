@@ -1,4 +1,4 @@
-# Multi-Dataset Multi-Model Web Demo
+# Recommender System simulation experiment platform
 
 ## 1. 训练模型（MovieLens-1M）
 
