@@ -3,10 +3,10 @@
 ## 1. 训练模型（MovieLens-1M）
 
 ```bash
-cd /Users/chongzhang/Web_sim
-python3 train_sasrec.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/sasrec_ml1m.pt --epochs 10 --eval-ks 10,20
-python3 train_lightgcn.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/lightgcn_ml1m.pt --epochs 30 --eval-ks 10,20
-python3 train_multvae.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt --epochs 30 --eval-ks 10,20
+cd /Web_sim
+python3 train_sasrec.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/sasrec_ml1m.pt --epochs 10 --eval-ks 10,20
+python3 train_lightgcn.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/lightgcn_ml1m.pt --epochs 30 --eval-ks 10,20
+python3 train_multvae.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt --epochs 30 --eval-ks 10,20
 ```
 
 训练时会在每个 epoch 输出验证集指标（`HR@K`、`NDCG@K`），并按 `HR@10` 自动保存最佳 checkpoint。
@@ -14,23 +14,23 @@ python3 train_multvae.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M
 ## 2. 训练模型（Amazon Musical Instruments）
 
 ```bash
-cd /Users/chongzhang/Web_sim
-python3 train_sasrec.py --dataset-dir /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/sasrec_amazon_mi.pt --epochs 10 --eval-ks 10,20
-python3 train_lightgcn.py --dataset-dir /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/lightgcn_amazon_mi.pt --epochs 30 --eval-ks 10,20
-python3 train_multvae.py --dataset-dir /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/multvae_amazon_mi.pt --epochs 30 --eval-ks 10,20
+cd /Web_sim
+python3 train_sasrec.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/sasrec_amazon_mi.pt --epochs 10 --eval-ks 10,20
+python3 train_lightgcn.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/lightgcn_amazon_mi.pt --epochs 30 --eval-ks 10,20
+python3 train_multvae.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/multvae_amazon_mi.pt --epochs 30 --eval-ks 10,20
 ```
 
 或使用一键脚本：
 
 ```bash
-cd /Users/chongzhang/Web_sim
-./train_amazon_mi_all.sh /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments
+cd /Web_sim
+./train_amazon_mi_all.sh /WebSim_Dataset/amazon_v2/Musical_Instruments
 ```
 
 ## 3. 启动网站
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Web_sim
 PORT=19001 python3 app.py
 ```
 
