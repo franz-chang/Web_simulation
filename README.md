@@ -1,5 +1,10 @@
 # Recommender System simulation experiment platform
 
+## 0.数据集准备
+
+请新建一个和 Web_simulation平级的目录： WebSim_Dataset. 所需的数据集在：https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing.
+预训练好的SASRec, Multi-VAE, LightGCN在：
+
 ## 1. 训练模型（MovieLens-1M）
 
 ```bash
