@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>多数据集推荐 Demo - 上下滑页面</title>
+  <link rel="stylesheet" href="/static/swipe.css">
+</head>
+<body>
+  <main class="swipe-page">
+    <header class="page-head">
+      <div class="hero-copy">
+        <p class="eyebrow">Recommendation Sandbox</p>
+        <h1>多数据集推荐滑动台</h1>
+        <p class="hero-desc">选择数据集与模型，像刷卡片一样快速浏览推荐内容。</p>
+      </div>
+      <a href="/" class="back-link">返回首页网格页</a>
+    </header>
+
+    <section class="swipe-layout">
+      <aside class="left-controls panel">
+        <h2>参数面板</h2>
+        <p class="panel-tip">切换选项后会自动加载新的第一条推荐。</p>
+
+        <label class="control-box">
+          <span>数据集</span>
+          <select id="datasetSelect">
+            <option value="ml1m">MovieLens-1M</option>
+            <option value="amazon_mi">Amazon Musical Instruments</option>
+          </select>
+        </label>
+
+        <label class="control-box">
+          <span>推荐模型</span>
+          <select id="algoSelect">
+            <option value="sasrec">SASRec</option>
+            <option value="lightgcn">LightGCN</option>
+            <option value="multvae">Mult-VAE</option>
+          </select>
+        </label>
+      </aside>
+
+      <section class="center-panel panel">
+        <div class="center-top">
+          <button id="resetBtn" type="button" class="action-btn wide-btn">随机重置</button>
+          <p class="hotkey-tip">键盘支持：↑ 上划 / ↓ 下划</p>
+        </div>
+
+        <article id="swipeCard" class="swipe-card">
+          <img id="swipePoster" class="poster" src="" alt="推荐内容海报">
+          <div class="content">
+            <h3 id="swipeTitle" class="title">加载中...</h3>
+            <p id="swipeDesc" class="desc">正在准备推荐内容</p>
+          </div>
+        </article>
+
+        <div class="meta-row" aria-live="polite">
+          <span id="datasetBadge" class="meta-chip">MovieLens-1M</span>
+          <span id="modelBadge" class="meta-chip">SASRec</span>
+          <span id="indexBadge" class="meta-chip">第 0 条</span>
+        </div>
+
+        <p id="statusText" class="status-text">加载中...</p>
+      </section>
+
+      <aside class="right-controls panel">
+        <h2>滑动操作</h2>
+        <p class="panel-tip">可点击按钮，也可直接使用方向键。</p>
+        <button id="upBtn" type="button" class="action-btn">上划</button>
+        <button id="downBtn" type="button" class="action-btn">下划</button>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/swipe.js"></script>
+</body>
+</html>

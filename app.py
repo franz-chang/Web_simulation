@@ -161,6 +161,11 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/swipe")
+def swipe():
+    return render_template("swipe.html")
+
+
 @app.route("/health")
 def health():
     status = {}
