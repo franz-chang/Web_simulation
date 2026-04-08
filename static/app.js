@@ -20,6 +20,10 @@ function escapeHtml(text) {
 }
 
 function modelLabel(modelName) {
+  if (modelName === "poprec") return "PopRec";
+  if (modelName === "bprmf") return "BPR-MF";
+  if (modelName === "gru4rec") return "GRU4Rec";
+  if (modelName === "bert4rec") return "BERT4Rec";
   if (modelName === "lightgcn") return "LightGCN";
   if (modelName === "multvae") return "Mult-VAE";
   if (modelName === "sasrec") return "SASRec";

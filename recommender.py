@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import torch
 
+from bert4rec import BERT4Rec
+from gru4rec import GRU4Rec
 from multvae import MultiVAE
 from sasrec import SASRec
 
@@ -353,6 +355,187 @@ class MultVAEEngine(_BaseEngine):
         return rec_movie_ids
 
 
+class PopRecEngine(_BaseEngine):
+    def __init__(self, artifact_path: str):
+        super().__init__()
+        artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
+        self.item2idx = artifact["item2idx"]
+        self.idx2item = artifact["idx2item"]
+
+        ranked_indices = artifact.get("ranked_item_indices", [])
+        if ranked_indices:
+            self.ranked_indices = [int(x) for x in ranked_indices if int(x) > 0]
+            return
+
+        counts = artifact.get("item_popularity", None)
+        if counts is None:
+            self.ranked_indices = []
+            return
+
+        if isinstance(counts, torch.Tensor):
+            counts_tensor = counts
+        else:
+            counts_tensor = torch.tensor(counts, dtype=torch.float32)
+        ranking = torch.argsort(counts_tensor, descending=True).tolist()
+        self.ranked_indices = [int(x) for x in ranking if int(x) > 0]
+
+    def recommend(self, history_movie_ids: list[str], topk: int) -> list[str]:
+        seen_indices = set()
+        for mid in history_movie_ids:
+            idx = self._to_item_index(mid)
+            if idx is not None:
+                seen_indices.add(idx)
+
+        rec_movie_ids = []
+        for item_idx in self.ranked_indices:
+            if item_idx <= 0 or item_idx in seen_indices:
+                continue
+            rec_movie_ids.append(self._to_item_id(self.idx2item[item_idx]))
+            if len(rec_movie_ids) >= topk:
+                break
+        return rec_movie_ids
+
+
+class BPRMFEngine(_BaseEngine):
+    def __init__(self, artifact_path: str):
+        super().__init__()
+        artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
+        config = artifact["config"]
+        self.item2idx = artifact["item2idx"]
+        self.idx2item = artifact["idx2item"]
+        self.max_history = int(config.get("max_history", 50))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.item_embeddings = artifact["final_item_embeddings"].to(self.device)
+
+    def recommend(self, history_movie_ids: list[str], topk: int) -> list[str]:
+        mapped_history = []
+        for mid in history_movie_ids:
+            idx = self._to_item_index(mid)
+            if idx is not None:
+                mapped_history.append(idx)
+        if not mapped_history:
+            return []
+        mapped_history = mapped_history[-self.max_history :]
+
+        hist_tensor = torch.LongTensor(mapped_history).to(self.device)
+        with torch.no_grad():
+            user_emb = self.item_embeddings[hist_tensor].mean(dim=0, keepdim=True)
+            scores = torch.matmul(user_emb, self.item_embeddings.transpose(0, 1))[0]
+            scores[0] = -1e9
+            for item_idx in set(mapped_history):
+                scores[item_idx] = -1e9
+
+        k = min(topk, len(self.idx2item) - 1)
+        top_indices = torch.topk(scores, k=k).indices.tolist()
+        rec_movie_ids = []
+        for item_idx in top_indices:
+            if item_idx <= 0:
+                continue
+            rec_movie_ids.append(self._to_item_id(self.idx2item[item_idx]))
+        return rec_movie_ids
+
+
+class GRU4RecEngine(_BaseEngine):
+    def __init__(self, artifact_path: str):
+        super().__init__()
+        artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
+        config = artifact["config"]
+        self.item2idx = artifact["item2idx"]
+        self.idx2item = artifact["idx2item"]
+        self.max_len = int(config["max_len"])
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.model = GRU4Rec(
+            num_items=int(config["num_items"]),
+            embedding_dim=int(config["embedding_dim"]),
+            hidden_dim=int(config["hidden_dim"]),
+            num_layers=int(config["num_layers"]),
+            dropout=float(config["dropout"]),
+        ).to(self.device)
+        self.model.load_state_dict(artifact["model_state_dict"])
+        self.model.eval()
+
+    def recommend(self, history_movie_ids: list[str], topk: int) -> list[str]:
+        mapped_history = []
+        for mid in history_movie_ids:
+            idx = self._to_item_index(mid)
+            if idx is not None:
+                mapped_history.append(idx)
+        if not mapped_history:
+            return []
+
+        seq = np.zeros(self.max_len, dtype=np.int64)
+        recent = mapped_history[-self.max_len :]
+        seq[-len(recent) :] = recent
+        seq_tensor = torch.LongTensor(seq).unsqueeze(0).to(self.device)
+
+        with torch.no_grad():
+            scores = self.model.predict_scores(seq_tensor)[0]
+        for item_idx in set(mapped_history):
+            scores[item_idx] = -1e9
+
+        k = min(topk, len(self.idx2item) - 1)
+        top_indices = torch.topk(scores, k=k).indices.tolist()
+        rec_movie_ids = []
+        for item_idx in top_indices:
+            if item_idx <= 0:
+                continue
+            rec_movie_ids.append(self._to_item_id(self.idx2item[item_idx]))
+        return rec_movie_ids
+
+
+class BERT4RecEngine(_BaseEngine):
+    def __init__(self, artifact_path: str):
+        super().__init__()
+        artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
+        config = artifact["config"]
+        self.item2idx = artifact["item2idx"]
+        self.idx2item = artifact["idx2item"]
+        self.max_len = int(config["max_len"])
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.model = BERT4Rec(
+            num_items=int(config["num_items"]),
+            max_len=int(config["max_len"]),
+            hidden_dim=int(config["hidden_dim"]),
+            num_heads=int(config["num_heads"]),
+            num_layers=int(config["num_layers"]),
+            dropout=float(config["dropout"]),
+        ).to(self.device)
+        self.model.load_state_dict(artifact["model_state_dict"])
+        self.model.eval()
+
+    def recommend(self, history_movie_ids: list[str], topk: int) -> list[str]:
+        mapped_history = []
+        for mid in history_movie_ids:
+            idx = self._to_item_index(mid)
+            if idx is not None:
+                mapped_history.append(idx)
+        if not mapped_history:
+            return []
+
+        # Reserve one slot for [MASK] at the end.
+        recent = mapped_history[-(self.max_len - 1) :]
+        input_ids = np.zeros(self.max_len, dtype=np.int64)
+        input_ids[-(len(recent) + 1) : -1] = recent
+        input_ids[-1] = self.model.mask_token
+        seq_tensor = torch.LongTensor(input_ids).unsqueeze(0).to(self.device)
+
+        with torch.no_grad():
+            scores = self.model.predict_scores(seq_tensor)[0]
+        for item_idx in set(mapped_history):
+            scores[item_idx] = -1e9
+
+        k = min(topk, len(self.idx2item) - 1)
+        top_indices = torch.topk(scores, k=k).indices.tolist()
+        rec_movie_ids = []
+        for item_idx in top_indices:
+            if item_idx <= 0:
+                continue
+            rec_movie_ids.append(self._to_item_id(self.idx2item[item_idx]))
+        return rec_movie_ids
+
+
 class MovieRecommender:
     def __init__(
         self,
@@ -361,6 +544,10 @@ class MovieRecommender:
         sasrec_artifact_path: str | None = None,
         lightgcn_artifact_path: str | None = None,
         multvae_artifact_path: str | None = None,
+        poprec_artifact_path: str | None = None,
+        bprmf_artifact_path: str | None = None,
+        gru4rec_artifact_path: str | None = None,
+        bert4rec_artifact_path: str | None = None,
     ):
         self.dataset_key = dataset_key
         self.dataset_dir = str(dataset_dir)
@@ -372,6 +559,14 @@ class MovieRecommender:
             self.engines["lightgcn"] = LightGCNEngine(lightgcn_artifact_path)
         if multvae_artifact_path and Path(multvae_artifact_path).exists():
             self.engines["multvae"] = MultVAEEngine(multvae_artifact_path)
+        if poprec_artifact_path and Path(poprec_artifact_path).exists():
+            self.engines["poprec"] = PopRecEngine(poprec_artifact_path)
+        if bprmf_artifact_path and Path(bprmf_artifact_path).exists():
+            self.engines["bprmf"] = BPRMFEngine(bprmf_artifact_path)
+        if gru4rec_artifact_path and Path(gru4rec_artifact_path).exists():
+            self.engines["gru4rec"] = GRU4RecEngine(gru4rec_artifact_path)
+        if bert4rec_artifact_path and Path(bert4rec_artifact_path).exists():
+            self.engines["bert4rec"] = BERT4RecEngine(bert4rec_artifact_path)
 
         item_whitelist: set[str] | None = None
         if self.engines:

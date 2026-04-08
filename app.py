@@ -61,6 +61,22 @@ DATASET_CONFIGS = {
                 ["MULTVAE_ML1M_MODEL_PATH", "MULTVAE_MODEL_PATH"],
                 str(BASE_DIR / "artifacts" / "multvae_ml1m.pt"),
             ),
+            "poprec": first_env_or_default(
+                ["POPREC_ML1M_MODEL_PATH", "POPREC_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "poprec_ml1m.pt"),
+            ),
+            "bprmf": first_env_or_default(
+                ["BPRMF_ML1M_MODEL_PATH", "BPRMF_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bprmf_ml1m.pt"),
+            ),
+            "gru4rec": first_env_or_default(
+                ["GRU4REC_ML1M_MODEL_PATH", "GRU4REC_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "gru4rec_ml1m.pt"),
+            ),
+            "bert4rec": first_env_or_default(
+                ["BERT4REC_ML1M_MODEL_PATH", "BERT4REC_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bert4rec_ml1m.pt"),
+            ),
         },
     },
     "amazon_mi": {
@@ -78,6 +94,22 @@ DATASET_CONFIGS = {
             "multvae": first_env_or_default(
                 ["MULTVAE_AMAZON_MI_MODEL_PATH"],
                 str(BASE_DIR / "artifacts" / "multvae_amazon_mi.pt"),
+            ),
+            "poprec": first_env_or_default(
+                ["POPREC_AMAZON_MI_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "poprec_amazon_mi.pt"),
+            ),
+            "bprmf": first_env_or_default(
+                ["BPRMF_AMAZON_MI_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bprmf_amazon_mi.pt"),
+            ),
+            "gru4rec": first_env_or_default(
+                ["GRU4REC_AMAZON_MI_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "gru4rec_amazon_mi.pt"),
+            ),
+            "bert4rec": first_env_or_default(
+                ["BERT4REC_AMAZON_MI_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bert4rec_amazon_mi.pt"),
             ),
         },
     },
@@ -131,6 +163,10 @@ def get_recommender(dataset_key: str) -> MovieRecommender:
         sasrec_artifact_path=models.get("sasrec"),
         lightgcn_artifact_path=models.get("lightgcn"),
         multvae_artifact_path=models.get("multvae"),
+        poprec_artifact_path=models.get("poprec"),
+        bprmf_artifact_path=models.get("bprmf"),
+        gru4rec_artifact_path=models.get("gru4rec"),
+        bert4rec_artifact_path=models.get("bert4rec"),
     )
     recommenders[key] = recommender
     return recommender
