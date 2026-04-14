@@ -1,107 +1,126 @@
-# Recommender System simulation experiment platform
+# Web_sim 推荐系统仿真平台
+
+基于 Flask 的推荐系统交互仿真平台，支持两种页面形态：
+- 网格页（Net page）：4 卡片展示 + 点击/翻页
+- 滑动页（Swipe page）：上下划交互 + 实时状态反馈
+
+## 当前进度（2026-04-14）
+
+- 所有 Shell 脚本已统一迁移到 `scripts/` 目录。
+- 启停与训练脚本均已适配新目录结构（从 `scripts/` 调用也能正确定位项目根目录）。
+- `artifacts/` 当前可用模型类型共 **7 种**：`sasrec`、`lightgcn`、`multvae`、`bert4rec`、`bprmf`、`gru4rec`、`poprec`。
+
+## 目录结构（关键）
+
+- `app.py`: Web 服务入口
+- `artifacts/`: 模型权重与训练日志
+- `templates/` + `static/`: 页面模板与静态资源
+- `scripts/`: 运行、训练、维护脚本
 
 ## 0. 数据集准备
 
-请新建一个和 Web_simulation平级的目录： WebSim_Dataset. 所需的数据集在：
-https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing.
+请在 `Web_sim` 同级目录准备 `WebSim_Dataset`，常用路径示例：
 
-预训练好的SASRec, Multi-VAE, LightGCN在：
-https://drive.google.com/drive/folders/1Av0ly-myQlt2e-II9j4B0x5PBFqsTGW3?usp=sharing
+- `../WebSim_Dataset/MM-ML-1M-main`
+- `../WebSim_Dataset/amazon_v2/Musical_Instruments`
+- `../WebSim_Dataset/amazon_v2/CDs_and_Vinyl`
 
-## 1. 训练模型（MovieLens-1M）
+数据与预训练模型参考（历史链接）：
+- 数据集：https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing
+- 预训练模型：https://drive.google.com/drive/folders/1Av0ly-myQlt2e-II9j4B0x5PBFqsTGW3?usp=sharing
+
+## 1. 训练模型
+
+### 1.1 MovieLens-1M（手动）
 
 ```bash
-cd /Web_sim
-python3 train_sasrec.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/sasrec_ml1m.pt --epochs 10 --eval-ks 10,20
-python3 train_lightgcn.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/lightgcn_ml1m.pt --epochs 30 --eval-ks 10,20
-python3 train_multvae.py --dataset-dir /WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt --epochs 30 --eval-ks 10,20
+cd /Users/chongzhang/Web_sim
+python3 train_sasrec.py   --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/sasrec_ml1m.pt   --epochs 10 --eval-ks 10,20
+python3 train_lightgcn.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/lightgcn_ml1m.pt --epochs 30 --eval-ks 10,20
+python3 train_multvae.py  --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt  --epochs 30 --eval-ks 10,20
 ```
 
-训练时会在每个 epoch 输出验证集指标（`HR@K`、`NDCG@K`），并按 `HR@10` 自动保存最佳 checkpoint。
-
-## 2. 训练模型（Amazon Musical Instruments）
+### 1.2 Amazon（一键脚本）
 
 ```bash
-cd /Web_sim
-python3 train_sasrec.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/sasrec_amazon_mi.pt --epochs 10 --eval-ks 10,20
-python3 train_lightgcn.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/lightgcn_amazon_mi.pt --epochs 30 --eval-ks 10,20
-python3 train_multvae.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instruments --output-model artifacts/multvae_amazon_mi.pt --epochs 30 --eval-ks 10,20
+cd /Users/chongzhang/Web_sim
+./scripts/train_amazon_mi_all.sh /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments
+./scripts/train_amazon_cds_all.sh /Users/chongzhang/WebSim_Dataset/amazon_v2/CDs_and_Vinyl
 ```
 
-或使用一键脚本：
+说明：
+- `train_amazon_cds_all.sh` 默认使用 `CDs_and_Vinyl`；若不存在会回退到 `Musical_Instruments`（并打印警告）。
+- 输出模型位于 `artifacts/`。
+
+## 2. 启动网站
+
+### 2.1 直接启动（Net page）
 
 ```bash
-cd /Web_sim
-./scripts/train_amazon_mi_all.sh /WebSim_Dataset/amazon_v2/Musical_Instruments
-```
-
-## 3. 启动网站
-
-```bash
-cd /Web_sim
+cd /Users/chongzhang/Web_sim
 PORT=19001 python3 app.py
 ```
 
-打开 `http://127.0.0.1:19001` 即可访问。
+访问：
+- 网格页：`http://127.0.0.1:19001/`
+- 健康检查：`http://127.0.0.1:19001/health`
 
-## 4. Swipe page（上下滑页面）
-
-### 4.1 启动/关闭（推荐）
-
-启动脚本会在后台拉起服务、做健康检查，并自动打开 Swipe 页面：
+### 2.2 Swipe page（推荐）
 
 ```bash
-cd /Web_sim
+cd /Users/chongzhang/Web_sim
 ./scripts/run_swipe_page.sh
-```
-
-关闭由 `scripts/run_swipe_page.sh` 启动的服务：
-
-```bash
-cd /Web_sim
 ./scripts/stop_swipe_page.sh
 ```
 
 默认地址：
-
-- Swipe 页面：`http://127.0.0.1:19002/swipe`
+- Swipe 页：`http://127.0.0.1:19002/swipe`
 - 健康检查：`http://127.0.0.1:19002/health`
 
 可选环境变量：
 
 ```bash
-HOST=127.0.0.1 PORT=19002 LOG_FILE=web.log ./scripts/run_swipe_page.sh
+HOST=127.0.0.1 PORT=19002 LOG_FILE=web.log OPEN_BROWSER=1 ./scripts/run_swipe_page.sh
 PORT=19002 ./scripts/stop_swipe_page.sh
 ```
 
-### 4.2 页面与交互（最近更新）
+说明：
+- `OPEN_BROWSER=0` 可禁止自动打开浏览器。
+- `LOG_FILE` 可用绝对路径；若是相对路径，按项目根目录解析。
 
-- 页面布局升级为三栏：左侧参数面板、中间推荐卡片区、右侧滑动操作区
-- 新增状态徽章：实时显示当前数据集、模型、以及“第 N 条”浏览位置
-- 操作方式支持按钮和键盘：`↑` 上划、`↓` 下划
-- 点击“随机重置”或切换数据集/模型会自动重新初始化推荐流
-- 卡片切换带入场动画，状态信息会在页面底部持续反馈
+## 3. scripts 脚本清单
 
-## 5. Net pages（网格页面）
+- `scripts/run_service.sh`: 前台启动服务（常用于被上层脚本托管）
+- `scripts/run_swipe_page.sh`: 后台启动 + 健康检查 + 可选自动打开页面
+- `scripts/stop_swipe_page.sh`: 停止指定端口服务
+- `scripts/quit.sh`: `stop_swipe_page.sh` 的别名入口
+- `scripts/train_amazon_mi_all.sh`: 一键训练 Amazon MI 三模型
+- `scripts/train_amazon_cds_all.sh`: 一键训练 Amazon CDS 三模型
+- `scripts/monitor_train_progress.sh`: 周期性记录训练进度到 `artifacts/train_progress_5min.log`
+- `scripts/commit.sh`: 自动 `add/commit/pull --rebase/push`
 
-### 5.1 访问方式
+## 4. 当前 artifacts 模型概览
 
-先按第 3 节启动服务：
+当前目录 `artifacts/` 中按 `.pt` 统计到以下 7 类模型：
+
+- `sasrec`
+- `lightgcn`
+- `multvae`
+- `bert4rec`
+- `bprmf`
+- `gru4rec`
+- `poprec`
+
+如需复查，可运行：
 
 ```bash
-cd /Web_sim
-PORT=19001 python3 app.py
+python3 - <<'PY'
+from pathlib import Path
+p=Path('/Users/chongzhang/Web_sim/artifacts')
+ext={'.pt','.pth','.ckpt','.bin'}
+files=[f for f in p.iterdir() if f.is_file() and f.suffix.lower() in ext]
+types=sorted({f.stem.split('_')[0].split('-')[0].lower() for f in files})
+print('types:', types)
+print('count:', len(types))
+PY
 ```
-
-网格页面地址：
-
-- 首页网格页：`http://127.0.0.1:19001/`
-- 健康检查：`http://127.0.0.1:19001/health`
-
-### 5.2 功能逻辑
-
-- 初始页：随机 4 个条目（1x4，一行四列）
-- 可在下拉菜单中切换数据集：`MovieLens-1M`、`Amazon Musical Instruments`
-- 可在下拉菜单中选择推理模型：`SASRec`、`LightGCN`、`Mult-VAE`
-- 点击某个条目：将点击历史输入当前模型，返回推荐 1-4 位
-- 点击“下一页”：返回 5-8 位、9-12 位...
