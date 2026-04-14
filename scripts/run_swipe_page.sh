@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+PROJECT_ROOT="$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd -P)"
+cd "${PROJECT_ROOT}"
 
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-19002}"
 URL="http://${HOST}:${PORT}/swipe"
 HEALTH_URL="http://${HOST}:${PORT}/health"
-LOG_FILE="${LOG_FILE:-web.log}"
+LOG_FILE="${LOG_FILE:-${PROJECT_ROOT}/web.log}"
+OPEN_BROWSER="${OPEN_BROWSER:-1}"
+OPEN_BROWSER_NORMALIZED="$(printf '%s' "${OPEN_BROWSER}" | tr '[:upper:]' '[:lower:]')"
+
+if [[ "${LOG_FILE}" != /* ]]; then
+  LOG_FILE="${PROJECT_ROOT}/${LOG_FILE}"
+fi
 
 if lsof -tiTCP:"${PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
   echo "[INFO] Web_sim service already running on ${HOST}:${PORT}"
@@ -19,7 +27,7 @@ else
   fi
 
   echo "[INFO] Starting Web_sim service on ${HOST}:${PORT} ..."
-  PORT="${PORT}" nohup "${PYTHON_BIN}" app.py >"${LOG_FILE}" 2>&1 &
+  PORT="${PORT}" nohup "${PYTHON_BIN}" "${PROJECT_ROOT}/app.py" >"${LOG_FILE}" 2>&1 &
   APP_PID=$!
   echo "[INFO] Service PID: ${APP_PID}"
 
@@ -38,10 +46,12 @@ else
   fi
 fi
 
-if command -v open >/dev/null 2>&1; then
-  open "${URL}"
-elif command -v xdg-open >/dev/null 2>&1; then
-  xdg-open "${URL}" >/dev/null 2>&1 || true
+if [[ "${OPEN_BROWSER_NORMALIZED}" != "0" && "${OPEN_BROWSER_NORMALIZED}" != "false" && "${OPEN_BROWSER_NORMALIZED}" != "no" ]]; then
+  if command -v open >/dev/null 2>&1; then
+    open "${URL}"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "${URL}" >/dev/null 2>&1 || true
+  fi
 fi
 
 echo "[OK] Swipe page: ${URL}"

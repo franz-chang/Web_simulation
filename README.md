@@ -32,7 +32,7 @@ python3 train_multvae.py --dataset-dir /WebSim_Dataset/amazon_v2/Musical_Instrum
 
 ```bash
 cd /Web_sim
-./train_amazon_mi_all.sh /WebSim_Dataset/amazon_v2/Musical_Instruments
+./scripts/train_amazon_mi_all.sh /WebSim_Dataset/amazon_v2/Musical_Instruments
 ```
 
 ## 3. 启动网站
@@ -52,14 +52,14 @@ PORT=19001 python3 app.py
 
 ```bash
 cd /Web_sim
-./run_swipe_page.sh
+./scripts/run_swipe_page.sh
 ```
 
-关闭由 `run_swipe_page.sh` 启动的服务：
+关闭由 `scripts/run_swipe_page.sh` 启动的服务：
 
 ```bash
 cd /Web_sim
-./stop_swipe_page.sh
+./scripts/stop_swipe_page.sh
 ```
 
 默认地址：
@@ -70,8 +70,8 @@ cd /Web_sim
 可选环境变量：
 
 ```bash
-HOST=127.0.0.1 PORT=19002 LOG_FILE=web.log ./run_swipe_page.sh
-PORT=19002 ./stop_swipe_page.sh
+HOST=127.0.0.1 PORT=19002 LOG_FILE=web.log ./scripts/run_swipe_page.sh
+PORT=19002 ./scripts/stop_swipe_page.sh
 ```
 
 ### 4.2 页面与交互（最近更新）
