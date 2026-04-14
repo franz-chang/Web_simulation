@@ -1,0 +1,18 @@
+flowchart TD
+  start(["开始"]) --> load["加载序列: load_user_sequences"]
+  load --> remap["重映射item + 划分train/valid/test"]
+  remap --> build["构建训练数据集或采样器"]
+  build --> loop{"epoch <= epochs?"}
+
+  loop -->|是| train["训练1个epoch"]
+  train --> valid["验证集评估 HR@10/20, NDCG@10/20"]
+  valid --> best{"HR@10提升?"}
+  best -->|是| keep["保存best_state_dict"]
+  best -->|否| cont["继续下一轮"]
+  keep --> cont
+  cont --> loop
+
+  loop -->|否| loadbest["加载最佳checkpoint"]
+  loadbest --> test["测试集评估"]
+  test --> save["保存artifact到artifacts/*.pt"]
+  save --> finish(["结束"])

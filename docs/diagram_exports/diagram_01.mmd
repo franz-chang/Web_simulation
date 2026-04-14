@@ -1,0 +1,39 @@
+flowchart LR
+  User["用户 / Browser"]
+
+  subgraph Frontend["前端层"]
+    Grid["templates/index.html + static/app.js"]
+    Swipe["templates/swipe.html + static/swipe.js"]
+  end
+
+  subgraph Backend["后端层 Flask app.py"]
+    API["/api/init /api/select /api/next /health /poster"]
+    Session["Flask Session"]
+    RecMgr["get_recommender()"]
+  end
+
+  subgraph RecLayer["推荐层 recommender.py"]
+    MR["MovieRecommender"]
+    Catalog["MovieCatalog"]
+    Engines["SASRec/LightGCN/MultVAE/PopRec/BPRMF/GRU4Rec/BERT4Rec Engines"]
+  end
+
+  subgraph DataAssets["数据与模型"]
+    Datasets["MovieLens-1M / Amazon MI"]
+    Artifacts["artifacts/*.pt"]
+    Posters["posters/ images/"]
+  end
+
+  User --> Grid
+  User --> Swipe
+  Grid --> API
+  Swipe --> API
+  API --> Session
+  API --> RecMgr
+  RecMgr --> MR
+  MR --> Engines
+  MR --> Catalog
+  Engines --> Artifacts
+  Catalog --> Datasets
+  Catalog --> Posters
+  API --> Catalog

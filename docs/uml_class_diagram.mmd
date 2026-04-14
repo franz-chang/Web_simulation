@@ -1,0 +1,65 @@
+classDiagram
+    class MovieRecommender {
+        +dataset_key: str
+        +dataset_dir: str
+        +engines: dict
+        +catalog: MovieCatalog
+        +available_models() list
+        +default_model() str
+        +normalize_model_name(model_name) str
+        +recommend_ids(history_movie_ids, model_name, topk) list
+        +movie_card(movie_id) dict
+        +poster_path(movie_id) Path
+    }
+
+    class MovieCatalog {
+        +dataset_key: str
+        +dataset_dir: Path
+        +item_whitelist: set
+        +movies: dict
+        +movie_ids: list
+        +random_movie_ids(n) list
+        +has_movie(movie_id) bool
+        +movie_card(movie_id) dict
+        +poster_path(movie_id) Path
+    }
+
+    class BaseEngine {
+        +item2idx: dict
+        +idx2item: list
+        +_to_item_index(item_id) int
+        +_to_item_id(raw_item) str
+    }
+
+    class SASRecEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class LightGCNEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class MultVAEEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class PopRecEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class BPRMFEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class GRU4RecEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+    class BERT4RecEngine {
+        +recommend(history_movie_ids, topk) list
+    }
+
+    BaseEngine <|-- SASRecEngine
+    BaseEngine <|-- LightGCNEngine
+    BaseEngine <|-- MultVAEEngine
+    BaseEngine <|-- PopRecEngine
+    BaseEngine <|-- BPRMFEngine
+    BaseEngine <|-- GRU4RecEngine
+    BaseEngine <|-- BERT4RecEngine
+
+    MovieRecommender --> MovieCatalog : owns
+    MovieRecommender --> BaseEngine : uses polymorphic engines

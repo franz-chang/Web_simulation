@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor U as 用户
+    participant FE as 前端(static/*.js)
+    participant API as Flask /api/select
+    participant S as Session
+    participant R as MovieRecommender
+    participant E as 选定Engine
+    participant C as MovieCatalog
+
+    U->>FE: 点击卡片/下滑触发选择
+    FE->>API: POST(movie_id, model_name, dataset_key)
+    API->>S: 读取history/model/dataset
+    API->>R: recommend_ids(history + movie_id, model, topk=200)
+
+    alt 模型可用且返回非空
+        R->>E: recommend(history, topk)
+        E-->>R: rec_ids
+    else 模型不可用或返回空
+        R-->>R: fallback random_movie_ids()
+    end
+
+    R->>C: has_movie() + movie_card()
+    R-->>API: 去重后的推荐ID列表
+    API->>S: 写回history/rec_ids/page_idx
+    API-->>FE: cards/page/has_next/available_models
+    FE-->>U: 渲染推荐结果

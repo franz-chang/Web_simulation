@@ -1,0 +1,6 @@
+01	系统架构图（Component / Container）	diagram_01.mmd
+02	模块依赖图（Module Dependency）	diagram_02.mmd
+03	核心接口时序图（Sequence: `/api/select`）	diagram_03.mmd
+04	训练流程活动图（Activity）	diagram_04.mmd
+05	会话状态图（State Machine）	diagram_05.mmd
+06	部署运行图（Deployment / Runtime）	diagram_06.mmd

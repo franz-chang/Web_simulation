@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> Uninitialized
+
+    Uninitialized --> RandomInitialized: GET /api/init
+    RandomInitialized --> Recommending: POST /api/select
+
+    Recommending --> Recommending: POST /api/select\n(追加history)
+    Recommending --> Paging: POST /api/next\n(有下一页)
+
+    Paging --> Paging: POST /api/next\n(继续翻页)
+    Paging --> Exhausted: POST /api/next\n(没有更多)
+
+    Exhausted --> RandomInitialized: GET /api/init\n(随机重置)
+    Recommending --> RandomInitialized: 切换数据集/模型后 init
+    Paging --> RandomInitialized: 切换数据集/模型后 init

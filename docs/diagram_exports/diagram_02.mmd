@@ -1,0 +1,54 @@
+flowchart TD
+  app[app.py]
+  rec[recommender.py]
+  du[dataset_utils.py]
+
+  sas[sasrec.py]
+  lgc[lightgcn.py]
+  mvae[multvae.py]
+  pop[poprec.py]
+  bpr[bprmf.py]
+  gru[gru4rec.py]
+  bert[bert4rec.py]
+
+  tsas[train_sasrec.py]
+  tlgc[train_lightgcn.py]
+  tmv[train_multvae.py]
+  tpop[train_poprec.py]
+  tbpr[train_bprmf.py]
+  tgru[train_gru4rec.py]
+  tbert[train_bert4rec.py]
+
+  front[templates/*.html + static/*.js]
+
+  app --> rec
+  app --> front
+
+  rec --> sas
+  rec --> lgc
+  rec --> mvae
+  rec --> pop
+  rec --> bpr
+  rec --> gru
+  rec --> bert
+
+  tsas --> du
+  tsas --> sas
+
+  tlgc --> du
+  tlgc --> lgc
+
+  tmv --> du
+  tmv --> mvae
+
+  tpop --> du
+  tpop --> pop
+
+  tbpr --> du
+  tbpr --> bpr
+
+  tgru --> du
+  tgru --> gru
+
+  tbert --> du
+  tbert --> bert
