@@ -1,6 +1,7 @@
 dataset:
   - MovieLens-1M
-  - Amazon Musical Instruments
+  - Amazon All Beauty
+  - Amazon Magazine Subscriptions
 model:
   - SASRec
   - LIghtGCN

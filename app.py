@@ -35,11 +35,24 @@ DEFAULT_ML1M_DIR = first_existing_path(
         Path("/Users/chongzhang/ml1m_sasrec_web/Dataset/MM-ML-1M-main"),
     ]
 )
-DEFAULT_AMAZON_MI_DIR = first_existing_path(
+DEFAULT_AMAZON_MM_2018_ROOT = first_existing_path(
     [
-        BASE_DIR.parent / "WebSim_Dataset" / "amazon_v2" / "Musical_Instruments",
-        BASE_DIR / "Dataset" / "amazon_v2" / "Musical_Instruments",
-        Path("/Users/chongzhang/ml1m_sasrec_web/Dataset/amazon_v2/Musical_Instruments"),
+        BASE_DIR.parent / "WebSim_Dataset" / "Amazon_MM_2018",
+        BASE_DIR / "Dataset" / "Amazon_MM_2018",
+    ]
+)
+DEFAULT_AMAZON_ALL_BEAUTY_DIR = first_existing_path(
+    [
+        DEFAULT_AMAZON_MM_2018_ROOT / "All_Beauty",
+        BASE_DIR.parent / "WebSim_Dataset" / "All_Beauty",
+        BASE_DIR / "Dataset" / "All_Beauty",
+    ]
+)
+DEFAULT_AMAZON_MAGAZINE_SUBSCRIPTIONS_DIR = first_existing_path(
+    [
+        DEFAULT_AMAZON_MM_2018_ROOT / "Magazine_Subscriptions",
+        BASE_DIR.parent / "WebSim_Dataset" / "Magazine_Subscriptions",
+        BASE_DIR / "Dataset" / "Magazine_Subscriptions",
     ]
 )
 
@@ -79,37 +92,74 @@ DATASET_CONFIGS = {
             ),
         },
     },
-    "amazon_mi": {
-        "label": "Amazon Musical Instruments",
-        "dataset_dir": os.getenv("AMAZON_MI_DATASET_DIR", str(DEFAULT_AMAZON_MI_DIR)),
+    "amazon_all_beauty": {
+        "label": "Amazon All Beauty",
+        "dataset_dir": os.getenv("AMAZON_ALL_BEAUTY_DATASET_DIR", str(DEFAULT_AMAZON_ALL_BEAUTY_DIR)),
         "models": {
             "sasrec": first_env_or_default(
-                ["SASREC_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "sasrec_amazon_mi.pt"),
+                ["SASREC_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "sasrec_amazon_all_beauty.pt"),
             ),
             "lightgcn": first_env_or_default(
-                ["LIGHTGCN_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "lightgcn_amazon_mi.pt"),
+                ["LIGHTGCN_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "lightgcn_amazon_all_beauty.pt"),
             ),
             "multvae": first_env_or_default(
-                ["MULTVAE_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "multvae_amazon_mi.pt"),
+                ["MULTVAE_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "multvae_amazon_all_beauty.pt"),
             ),
             "poprec": first_env_or_default(
-                ["POPREC_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "poprec_amazon_mi.pt"),
+                ["POPREC_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "poprec_amazon_all_beauty.pt"),
             ),
             "bprmf": first_env_or_default(
-                ["BPRMF_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "bprmf_amazon_mi.pt"),
+                ["BPRMF_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bprmf_amazon_all_beauty.pt"),
             ),
             "gru4rec": first_env_or_default(
-                ["GRU4REC_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "gru4rec_amazon_mi.pt"),
+                ["GRU4REC_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "gru4rec_amazon_all_beauty.pt"),
             ),
             "bert4rec": first_env_or_default(
-                ["BERT4REC_AMAZON_MI_MODEL_PATH"],
-                str(BASE_DIR / "artifacts" / "bert4rec_amazon_mi.pt"),
+                ["BERT4REC_AMAZON_ALL_BEAUTY_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bert4rec_amazon_all_beauty.pt"),
+            ),
+        },
+    },
+    "amazon_magazine_subscriptions": {
+        "label": "Amazon Magazine Subscriptions",
+        "dataset_dir": os.getenv(
+            "AMAZON_MAGAZINE_SUBSCRIPTIONS_DATASET_DIR",
+            str(DEFAULT_AMAZON_MAGAZINE_SUBSCRIPTIONS_DIR),
+        ),
+        "models": {
+            "sasrec": first_env_or_default(
+                ["SASREC_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "sasrec_amazon_magazine_subscriptions.pt"),
+            ),
+            "lightgcn": first_env_or_default(
+                ["LIGHTGCN_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "lightgcn_amazon_magazine_subscriptions.pt"),
+            ),
+            "multvae": first_env_or_default(
+                ["MULTVAE_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "multvae_amazon_magazine_subscriptions.pt"),
+            ),
+            "poprec": first_env_or_default(
+                ["POPREC_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "poprec_amazon_magazine_subscriptions.pt"),
+            ),
+            "bprmf": first_env_or_default(
+                ["BPRMF_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bprmf_amazon_magazine_subscriptions.pt"),
+            ),
+            "gru4rec": first_env_or_default(
+                ["GRU4REC_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "gru4rec_amazon_magazine_subscriptions.pt"),
+            ),
+            "bert4rec": first_env_or_default(
+                ["BERT4REC_AMAZON_MAGAZINE_SUBSCRIPTIONS_MODEL_PATH"],
+                str(BASE_DIR / "artifacts" / "bert4rec_amazon_magazine_subscriptions.pt"),
             ),
         },
     },

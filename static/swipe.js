@@ -37,8 +37,9 @@ function modelLabel(modelName) {
 }
 
 function datasetLabel(datasetKey) {
-  if (datasetKey === "amazon_mi") return "Amazon Musical Instruments";
   if (datasetKey === "ml1m") return "MovieLens-1M";
+  if (datasetKey === "amazon_all_beauty") return "Amazon All Beauty";
+  if (datasetKey === "amazon_magazine_subscriptions") return "Amazon Magazine Subscriptions";
   return String(datasetKey || "Unknown Dataset");
 }
 

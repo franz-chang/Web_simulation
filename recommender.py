@@ -192,15 +192,38 @@ class MovieCatalog:
     def poster_path(self, movie_id: str) -> Path | None:
         info = self.movies.get(movie_id, {})
         poster_name = self._safe_text(info.get("poster", ""))
-        if not poster_name:
-            return None
+        poster_candidates: list[str] = []
 
-        if self.dataset_key == "ml1m":
-            path = self.poster_dir / poster_name
-            return path if path.exists() else None
+        # Prefer explicit poster name from metadata first.
+        if poster_name:
+            poster_candidates.append(Path(poster_name).name)
 
-        path = self.image_dir / poster_name
-        return path if path.exists() else None
+        # Backward-compatible guesses for legacy datasets.
+        if movie_id:
+            poster_candidates.extend([f"{movie_id}.jpg", f"{movie_id}.jpeg", f"{movie_id}.png"])
+
+        # De-duplicate while keeping order.
+        seen = set()
+        ordered_candidates: list[str] = []
+        for name in poster_candidates:
+            if name and name not in seen:
+                seen.add(name)
+                ordered_candidates.append(name)
+
+        # New Amazon_MM_2018 uses posters/, legacy Amazon used images/.
+        for base_dir in (self.poster_dir, self.image_dir, self.dataset_dir):
+            for name in ordered_candidates:
+                path = base_dir / name
+                if path.exists():
+                    return path
+
+        # Fallback: some posters are named like "{item_id}_hash.jpg".
+        for base_dir in (self.poster_dir, self.image_dir):
+            matches = sorted(base_dir.glob(f"{movie_id}_*.jpg"))
+            if matches:
+                return matches[0]
+
+        return None
 
 
 class _BaseEngine:

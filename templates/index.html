@@ -10,13 +10,14 @@
   <main class="container">
     <h1>多数据集推荐 Demo</h1>
     <p class="subtitle"><a href="/swipe">进入第二页：上下滑推荐页</a></p>
-    <p class="subtitle">支持在 MovieLens-1M 和 Amazon Musical Instruments 之间切换，并使用 PopRec、BPR-MF、GRU4Rec、BERT4Rec、SASRec、LightGCN、Mult-VAE 推荐。</p>
+    <p class="subtitle">支持在 MovieLens-1M、Amazon All Beauty、Amazon Magazine Subscriptions 之间切换，并使用 PopRec、BPR-MF、GRU4Rec、BERT4Rec、SASRec、LightGCN、Mult-VAE 推荐。</p>
 
     <section class="toolbar">
       <label for="datasetSelect">数据集</label>
       <select id="datasetSelect">
         <option value="ml1m">MovieLens-1M</option>
-        <option value="amazon_mi">Amazon Musical Instruments</option>
+        <option value="amazon_all_beauty">Amazon All Beauty</option>
+        <option value="amazon_magazine_subscriptions">Amazon Magazine Subscriptions</option>
       </select>
 
       <label for="algoSelect">推理模型</label>

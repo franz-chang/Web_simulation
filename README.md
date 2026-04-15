@@ -22,8 +22,8 @@
 请在 `Web_sim` 同级目录准备 `WebSim_Dataset`，常用路径示例：
 
 - `../WebSim_Dataset/MM-ML-1M-main`
-- `../WebSim_Dataset/amazon_v2/Musical_Instruments`
-- `../WebSim_Dataset/amazon_v2/CDs_and_Vinyl`
+- `../WebSim_Dataset/Amazon_MM_2018/All_Beauty`
+- `../WebSim_Dataset/Amazon_MM_2018/Magazine_Subscriptions`
 
 数据与预训练模型参考（历史链接）：
 - 数据集：https://drive.google.com/drive/folders/1GvtEZcsLhcl3e6as6JOW0wEdmqSZo4CA?usp=sharing
@@ -40,16 +40,17 @@ python3 train_lightgcn.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1
 python3 train_multvae.py  --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt  --epochs 30 --eval-ks 10,20
 ```
 
-### 1.2 Amazon（一键脚本）
+### 1.2 Amazon_MM_2018（一键脚本）
 
 ```bash
 cd /Users/chongzhang/Web_sim
-./scripts/train_amazon_mi_all.sh /Users/chongzhang/WebSim_Dataset/amazon_v2/Musical_Instruments
-./scripts/train_amazon_cds_all.sh /Users/chongzhang/WebSim_Dataset/amazon_v2/CDs_and_Vinyl
+./scripts/train_amazon_all_beauty_all.sh /Users/chongzhang/WebSim_Dataset/Amazon_MM_2018/All_Beauty
+./scripts/train_amazon_magazine_subscriptions_all.sh /Users/chongzhang/WebSim_Dataset/Amazon_MM_2018/Magazine_Subscriptions
 ```
 
 说明：
-- `train_amazon_cds_all.sh` 默认使用 `CDs_and_Vinyl`；若不存在会回退到 `Musical_Instruments`（并打印警告）。
+- 两个脚本默认路径分别为 `Amazon_MM_2018/All_Beauty`、`Amazon_MM_2018/Magazine_Subscriptions`。
+- 可直接调用通用脚本：`scripts/train_amazon_mm2018_all.sh <dataset_dir> <model_suffix>`。
 - 输出模型位于 `artifacts/`。
 
 ## 2. 启动网站
@@ -94,8 +95,9 @@ PORT=19002 ./scripts/stop_swipe_page.sh
 - `scripts/run_swipe_page.sh`: 后台启动 + 健康检查 + 可选自动打开页面
 - `scripts/stop_swipe_page.sh`: 停止指定端口服务
 - `scripts/quit.sh`: `stop_swipe_page.sh` 的别名入口
-- `scripts/train_amazon_mi_all.sh`: 一键训练 Amazon MI 三模型
-- `scripts/train_amazon_cds_all.sh`: 一键训练 Amazon CDS 三模型
+- `scripts/train_amazon_all_beauty_all.sh`: 一键训练 Amazon All Beauty 三模型
+- `scripts/train_amazon_magazine_subscriptions_all.sh`: 一键训练 Amazon Magazine Subscriptions 三模型
+- `scripts/train_amazon_mm2018_all.sh`: Amazon_MM_2018 通用三模型训练脚本
 - `scripts/monitor_train_progress.sh`: 周期性记录训练进度到 `artifacts/train_progress_5min.log`
 - `scripts/commit.sh`: 自动 `add/commit/pull --rebase/push`
 
