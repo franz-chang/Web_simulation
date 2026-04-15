@@ -29,10 +29,13 @@ mkdir -p "${PROJECT_ROOT}/artifacts"
 SASREC_EPOCHS="${SASREC_EPOCHS:-10}"
 LIGHTGCN_EPOCHS="${LIGHTGCN_EPOCHS:-30}"
 MULTVAE_EPOCHS="${MULTVAE_EPOCHS:-30}"
+BPRMF_EPOCHS="${BPRMF_EPOCHS:-50}"
+GRU4REC_EPOCHS="${GRU4REC_EPOCHS:-30}"
+BERT4REC_EPOCHS="${BERT4REC_EPOCHS:-30}"
 
 echo "[INFO] Training on dataset: ${DATASET_DIR}"
 echo "[INFO] Model suffix: ${MODEL_SUFFIX}"
-echo "[INFO] Epochs => SASRec=${SASREC_EPOCHS}, LightGCN=${LIGHTGCN_EPOCHS}, MultVAE=${MULTVAE_EPOCHS}"
+echo "[INFO] Epochs => SASRec=${SASREC_EPOCHS}, LightGCN=${LIGHTGCN_EPOCHS}, MultVAE=${MULTVAE_EPOCHS}, BPRMF=${BPRMF_EPOCHS}, GRU4Rec=${GRU4REC_EPOCHS}, BERT4Rec=${BERT4REC_EPOCHS}, PopRec=NA"
 
 "${PYTHON_BIN}" "${PROJECT_ROOT}/train_sasrec.py" \
   --dataset-dir "${DATASET_DIR}" \
@@ -52,4 +55,27 @@ echo "[INFO] Epochs => SASRec=${SASREC_EPOCHS}, LightGCN=${LIGHTGCN_EPOCHS}, Mul
   --epochs "${MULTVAE_EPOCHS}" \
   --eval-ks 10,20
 
-echo "[DONE] Finished all 3 models for ${MODEL_SUFFIX}."
+"${PYTHON_BIN}" "${PROJECT_ROOT}/train_poprec.py" \
+  --dataset-dir "${DATASET_DIR}" \
+  --output-model "${PROJECT_ROOT}/artifacts/poprec_${MODEL_SUFFIX}.pt" \
+  --eval-ks 10,20
+
+"${PYTHON_BIN}" "${PROJECT_ROOT}/train_bprmf.py" \
+  --dataset-dir "${DATASET_DIR}" \
+  --output-model "${PROJECT_ROOT}/artifacts/bprmf_${MODEL_SUFFIX}.pt" \
+  --epochs "${BPRMF_EPOCHS}" \
+  --eval-ks 10,20
+
+"${PYTHON_BIN}" "${PROJECT_ROOT}/train_gru4rec.py" \
+  --dataset-dir "${DATASET_DIR}" \
+  --output-model "${PROJECT_ROOT}/artifacts/gru4rec_${MODEL_SUFFIX}.pt" \
+  --epochs "${GRU4REC_EPOCHS}" \
+  --eval-ks 10,20
+
+"${PYTHON_BIN}" "${PROJECT_ROOT}/train_bert4rec.py" \
+  --dataset-dir "${DATASET_DIR}" \
+  --output-model "${PROJECT_ROOT}/artifacts/bert4rec_${MODEL_SUFFIX}.pt" \
+  --epochs "${BERT4REC_EPOCHS}" \
+  --eval-ks 10,20
+
+echo "[DONE] Finished all 7 models for ${MODEL_SUFFIX}."

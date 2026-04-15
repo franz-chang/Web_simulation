@@ -35,7 +35,15 @@ def _find_amazon_review_file(dataset_dir: Path) -> Path:
     if not raw_dir.exists():
         raise FileNotFoundError(f"Cannot find raw directory under: {dataset_dir}")
 
-    preferred_names = [f"{dataset_dir.name}.json.gz", "Musical_Instruments.json.gz"]
+    name_variants: list[str] = []
+    for name in (
+        dataset_dir.name,
+        dataset_dir.name.replace("-", "_"),
+        dataset_dir.name.replace(" ", "_"),
+    ):
+        if name and name not in name_variants:
+            name_variants.append(name)
+    preferred_names = [f"{name}.json.gz" for name in name_variants]
     for name in preferred_names:
         preferred = raw_dir / name
         if preferred.exists():

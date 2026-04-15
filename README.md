@@ -95,9 +95,9 @@ PORT=19002 ./scripts/stop_swipe_page.sh
 - `scripts/run_swipe_page.sh`: 后台启动 + 健康检查 + 可选自动打开页面
 - `scripts/stop_swipe_page.sh`: 停止指定端口服务
 - `scripts/quit.sh`: `stop_swipe_page.sh` 的别名入口
-- `scripts/train_amazon_all_beauty_all.sh`: 一键训练 Amazon All Beauty 三模型
-- `scripts/train_amazon_magazine_subscriptions_all.sh`: 一键训练 Amazon Magazine Subscriptions 三模型
-- `scripts/train_amazon_mm2018_all.sh`: Amazon_MM_2018 通用三模型训练脚本
+- `scripts/train_amazon_all_beauty_all.sh`: 一键训练 Amazon All Beauty 七模型
+- `scripts/train_amazon_magazine_subscriptions_all.sh`: 一键训练 Amazon Magazine Subscriptions 七模型
+- `scripts/train_amazon_mm2018_all.sh`: Amazon_MM_2018 通用七模型训练脚本
 - `scripts/monitor_train_progress.sh`: 周期性记录训练进度到 `artifacts/train_progress_5min.log`
 - `scripts/commit.sh`: 自动 `add/commit/pull --rebase/push`
 

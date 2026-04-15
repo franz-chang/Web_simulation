@@ -122,7 +122,15 @@ class MovieCatalog:
 
     def _find_amazon_meta_path(self) -> Path | None:
         raw_dir = self.dataset_dir / "raw"
-        preferred_names = [f"meta_{self.dataset_dir.name}.json.gz", "meta_Musical_Instruments.json.gz"]
+        name_variants: list[str] = []
+        for name in (
+            self.dataset_dir.name,
+            self.dataset_dir.name.replace("-", "_"),
+            self.dataset_dir.name.replace(" ", "_"),
+        ):
+            if name and name not in name_variants:
+                name_variants.append(name)
+        preferred_names = [f"meta_{name}.json.gz" for name in name_variants]
         for name in preferred_names:
             preferred = raw_dir / name
             if preferred.exists():
