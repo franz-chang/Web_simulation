@@ -18,7 +18,7 @@ if [[ "${LOG_FILE}" != /* ]]; then
 fi
 
 if lsof -tiTCP:"${PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
-  echo "[INFO] Web_sim service already running on ${HOST}:${PORT}"
+  echo "[INFO] WebSim service already running on ${HOST}:${PORT}"
 else
   if [ -x "/opt/anaconda3/bin/python3" ]; then
     PYTHON_BIN="/opt/anaconda3/bin/python3"
@@ -26,7 +26,7 @@ else
     PYTHON_BIN="$(command -v python3)"
   fi
 
-  echo "[INFO] Starting Web_sim service on ${HOST}:${PORT} ..."
+  echo "[INFO] Starting WebSim service on ${HOST}:${PORT} ..."
   PORT="${PORT}" nohup "${PYTHON_BIN}" "${PROJECT_ROOT}/app.py" >"${LOG_FILE}" 2>&1 &
   APP_PID=$!
   echo "[INFO] Service PID: ${APP_PID}"

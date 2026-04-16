@@ -1,4 +1,5 @@
 import html
+import math
 import os
 import secrets
 from pathlib import Path
@@ -314,15 +315,28 @@ def enrich_cards(cards: list[dict], *, track_impressions: bool) -> list[dict]:
         item_id = str(card.get("id", "")).strip()
         rating_value = float(card.get("rating_value", 0.0) or 0.0)
         rating_value = max(0.0, min(5.0, rating_value))
+        rating_count = int(card.get("rating_count", 0) or 0)
         impression_count = int(impressions.get(item_id, 0))
         click_count = int(clicks.get(item_id, 0))
-        heat_celsius = click_count * 10
+
+        # Heat combines:
+        # 1) global popularity baseline from rating_count (log-scaled),
+        # 2) session interaction increments from impressions/clicks.
+        if rating_count > 0:
+            base_heat = int(round(min(90.0, math.log10(rating_count + 1.0) * 30.0)))
+        else:
+            base_heat = 0
+        interaction_heat = min(60, impression_count * 2 + click_count * 10)
+        heat_celsius = max(0, min(150, base_heat + interaction_heat))
 
         card["rating_value"] = rating_value
         card["rating_label"] = f"{rating_value:.1f}"
         card["rating_percent"] = max(0.0, min(100.0, rating_value / 5.0 * 100.0))
+        card["rating_count"] = rating_count
         card["heat_celsius"] = heat_celsius
         card["heat_label"] = f"{heat_celsius}\u00b0C"
+        card["heat_base"] = base_heat
+        card["heat_interaction"] = interaction_heat
         card["heat_clicks"] = click_count
         card["heat_impressions"] = impression_count
         out.append(card)

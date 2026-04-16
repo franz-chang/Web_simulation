@@ -1,11 +1,13 @@
-# Web_sim 推荐系统交互仿真平台
+# WebSim 推荐系统交互仿真平台
 
-`Web_sim` 是一个基于 Flask 的本地推荐系统仿真平台，提供两种交互页面：
+`WebSim` 是一个基于 Flask 的本地推荐系统仿真平台，提供两种交互页面：
 
 - 网格页（`/`）：4 卡片展示，支持点击与翻页
 - 滑动页（`/swipe`）：上下滑（含键盘上下键）浏览推荐
 
 当前服务支持 3 个数据集和 7 个推荐模型，并可按会话记录曝光/点击统计，实时展示评分与热度。
+
+> 路径说明：本文档默认使用 `/Users/chongzhang/WebSim`。若你本地目录仍为旧名 `/Users/chongzhang/Web_sim`，请将命令中的路径替换为旧目录即可。
 
 ## 当前能力（与代码一致）
 
@@ -43,7 +45,7 @@
 ## 环境安装
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Users/chongzhang/WebSim
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
@@ -82,7 +84,7 @@ pip install -r requirements.txt
 ### 1) 直接启动 Flask（默认 19001，首页网格页）
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Users/chongzhang/WebSim
 PORT=19001 python3 app.py
 ```
 
@@ -95,7 +97,7 @@ PORT=19001 python3 app.py
 ### 2) 推荐使用脚本启动滑动页（默认 19002）
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Users/chongzhang/WebSim
 ./scripts/run_swipe_page.sh
 ./scripts/stop_swipe_page.sh
 ```
@@ -158,7 +160,7 @@ PORT=19002 ./scripts/stop_swipe_page.sh
 ### 单模型训练（示例）
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Users/chongzhang/WebSim
 python3 train_sasrec.py   --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/sasrec_ml1m.pt   --epochs 10 --eval-ks 10,20
 python3 train_lightgcn.py --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/lightgcn_ml1m.pt --epochs 30 --eval-ks 10,20
 python3 train_multvae.py  --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1M-main --output-model artifacts/multvae_ml1m.pt  --epochs 30 --eval-ks 10,20
@@ -174,7 +176,7 @@ python3 train_multvae.py  --dataset-dir /Users/chongzhang/WebSim_Dataset/MM-ML-1
 ### Amazon_MM_2018 一键七模型训练
 
 ```bash
-cd /Users/chongzhang/Web_sim
+cd /Users/chongzhang/WebSim
 ./scripts/train_amazon_all_beauty_all.sh /Users/chongzhang/WebSim_Dataset/Amazon_MM_2018/All_Beauty
 ./scripts/train_amazon_magazine_subscriptions_all.sh /Users/chongzhang/WebSim_Dataset/Amazon_MM_2018/Magazine_Subscriptions
 ```

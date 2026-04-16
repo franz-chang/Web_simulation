@@ -15,11 +15,11 @@ get_pids() {
 PIDS="$(get_pids)"
 
 if [ -z "${PIDS}" ]; then
-  echo "[INFO] No Web_sim service listening on ${HOST}:${PORT}"
+  echo "[INFO] No WebSim service listening on ${HOST}:${PORT}"
   exit 0
 fi
 
-echo "[INFO] Stopping Web_sim service on ${HOST}:${PORT} ..."
+echo "[INFO] Stopping WebSim service on ${HOST}:${PORT} ..."
 echo "[INFO] Target PID(s): ${PIDS//$'\n'/ }"
 kill ${PIDS} || true
 
@@ -45,4 +45,4 @@ if [ -n "$(get_pids)" ]; then
   exit 1
 fi
 
-echo "[OK] Web_sim service stopped on ${HOST}:${PORT}"
+echo "[OK] WebSim service stopped on ${HOST}:${PORT}"

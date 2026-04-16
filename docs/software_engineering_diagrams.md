@@ -1,6 +1,6 @@
-# Web_sim 软件工程图谱
+# WebSim 软件工程图谱
 
-下面这套图是按 `/Users/chongzhang/Web_sim` 当前代码结构绘制的，覆盖了你这个项目最常用的几类软件工程图。
+下面这套图是按 `/Users/chongzhang/WebSim`（兼容旧目录 `/Users/chongzhang/Web_sim`）当前代码结构绘制的，覆盖了你这个项目最常用的几类软件工程图。
 
 ## 1) 系统架构图（Component / Container）
 
@@ -185,7 +185,7 @@ stateDiagram-v2
 flowchart LR
   Browser[浏览器\n127.0.0.1:19001/19002]
 
-  subgraph Host[本机 /Users/chongzhang/Web_sim]
+  subgraph Host[本机 /Users/chongzhang/WebSim]
     Script[scripts/run_swipe_page.sh / scripts/stop_swipe_page.sh]
     FlaskProc[python3 app.py]
     Templates[templates/* + static/*]

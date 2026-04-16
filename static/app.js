@@ -33,10 +33,13 @@ function formatStars(card) {
 
 function formatHeat(card) {
   const heatLabel = escapeHtml(card?.heat_label || "0°C");
+  const base = Number(card?.heat_base || 0);
+  const interaction = Number(card?.heat_interaction || 0);
   return `
-    <span class="metric-group heat-group" title="每点击一次增加 10°C">
+    <span class="metric-group heat-group" title="热度=历史基线+会话增量（曝光+2°C，点击+10°C）">
       <span class="metric-label">热度：</span>
       <span class="metric-value">${heatLabel}</span>
+      <span class="metric-subtle">(${Math.max(0, base)}+${Math.max(0, interaction)})</span>
     </span>
   `;
 }
