@@ -28,6 +28,16 @@ def first_env_or_default(env_names: list[str], default: str) -> str:
     return default
 
 
+def int_env_or_default(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
 DEFAULT_ML1M_DIR = first_existing_path(
     [
         BASE_DIR.parent / "WebSim_Dataset" / "MM-ML-1M-main",
@@ -166,6 +176,7 @@ DATASET_CONFIGS = {
 }
 
 DEFAULT_DATASET_KEY = os.getenv("DEFAULT_DATASET_KEY", "ml1m")
+DEFAULT_INIT_RANDOM_SEED = int_env_or_default("WEBSIM_INIT_RANDOM_SEED", 42)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(16))
@@ -210,6 +221,7 @@ def get_recommender(dataset_key: str) -> MovieRecommender:
     recommender = MovieRecommender(
         dataset_key=key,
         dataset_dir=str(dataset_dir),
+        random_seed=DEFAULT_INIT_RANDOM_SEED,
         sasrec_artifact_path=models.get("sasrec"),
         lightgcn_artifact_path=models.get("lightgcn"),
         multvae_artifact_path=models.get("multvae"),
@@ -289,7 +301,10 @@ def api_init():
         return jsonify({"error": str(err), "available_datasets": available_datasets()}), 400
 
     model_name = recommender.normalize_model_name(request.args.get("model_name"))
-    cards = [recommender.movie_card(mid) for mid in recommender.random_movie_ids(PAGE_SIZE)]
+    cards = [
+        recommender.movie_card(mid)
+        for mid in recommender.random_movie_ids(PAGE_SIZE, avoid_last_same=True)
+    ]
 
     session["history"] = []
     session["rec_ids"] = []

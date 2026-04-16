@@ -31,12 +31,20 @@ def candidate_item_keys(item_id: str) -> list[Any]:
 
 
 class MovieCatalog:
-    def __init__(self, dataset_key: str, dataset_dir: str, item_whitelist: set[str] | None = None):
+    def __init__(
+        self,
+        dataset_key: str,
+        dataset_dir: str,
+        item_whitelist: set[str] | None = None,
+        random_seed: int = 42,
+    ):
         self.dataset_key = dataset_key
         self.dataset_dir = Path(dataset_dir)
         self.poster_dir = self.dataset_dir / "posters"
         self.image_dir = self.dataset_dir / "images"
         self.item_whitelist = item_whitelist
+        self._rng = random.Random(int(random_seed))
+        self._last_random_ids: tuple[str, ...] | None = None
         self.movies = self._load_movies()
         self.movie_ids = list(self.movies.keys())
 
@@ -179,10 +187,23 @@ class MovieCatalog:
             return self._load_movielens()
         return self._load_amazon()
 
-    def random_movie_ids(self, n: int) -> list[str]:
+    def random_movie_ids(self, n: int, avoid_last_same: bool = False) -> list[str]:
         if len(self.movie_ids) <= n:
-            return self.movie_ids.copy()
-        return random.sample(self.movie_ids, n)
+            ids = self.movie_ids.copy()
+            if avoid_last_same:
+                self._last_random_ids = tuple(ids)
+            return ids
+
+        ids = self._rng.sample(self.movie_ids, n)
+        if avoid_last_same and self._last_random_ids is not None and tuple(ids) == self._last_random_ids:
+            for _ in range(5):
+                candidate = self._rng.sample(self.movie_ids, n)
+                if tuple(candidate) != self._last_random_ids:
+                    ids = candidate
+                    break
+        if avoid_last_same:
+            self._last_random_ids = tuple(ids)
+        return ids
 
     def has_movie(self, movie_id: str) -> bool:
         return movie_id in self.movies
@@ -572,6 +593,7 @@ class MovieRecommender:
         self,
         dataset_key: str,
         dataset_dir: str,
+        random_seed: int = 42,
         sasrec_artifact_path: str | None = None,
         lightgcn_artifact_path: str | None = None,
         multvae_artifact_path: str | None = None,
@@ -609,7 +631,12 @@ class MovieRecommender:
                         continue
                     item_whitelist.add(item_id)
 
-        self.catalog = MovieCatalog(dataset_key=dataset_key, dataset_dir=dataset_dir, item_whitelist=item_whitelist)
+        self.catalog = MovieCatalog(
+            dataset_key=dataset_key,
+            dataset_dir=dataset_dir,
+            item_whitelist=item_whitelist,
+            random_seed=random_seed,
+        )
 
     def available_models(self) -> list[str]:
         return sorted(self.engines.keys())
@@ -628,8 +655,8 @@ class MovieRecommender:
             return name
         return self.default_model()
 
-    def random_movie_ids(self, n: int) -> list[str]:
-        return self.catalog.random_movie_ids(n)
+    def random_movie_ids(self, n: int, avoid_last_same: bool = False) -> list[str]:
+        return self.catalog.random_movie_ids(n, avoid_last_same=avoid_last_same)
 
     @staticmethod
     def _unique_keep_order(movie_ids: list[str]) -> list[str]:
