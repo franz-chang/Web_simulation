@@ -78,6 +78,9 @@ select {
   box-shadow: 0 10px 20px rgba(17, 24, 39, 0.08);
   cursor: pointer;
   transition: transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .card:hover {
@@ -94,12 +97,75 @@ select {
 
 .content {
   padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 }
 
 .title {
   font-size: 16px;
   font-weight: 700;
-  margin: 0 0 6px;
+  margin: 0;
+  line-height: 1.35;
+  min-height: 2.7em;
+}
+
+.card-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 6px 0 2px;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.metric-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.metric-label {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.metric-value {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stars {
+  --rating-percent: 0%;
+  position: relative;
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.stars::before,
+.stars::after {
+  content: "★★★★★";
+}
+
+.stars::before {
+  color: #cbd5e1;
+}
+
+.stars::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--rating-percent);
+  overflow: hidden;
+  white-space: nowrap;
+  color: #f59e0b;
 }
 
 .desc {

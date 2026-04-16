@@ -64,6 +64,31 @@ class MovieCatalog:
         return "" if text.lower() == "nan" else text
 
     @staticmethod
+    def _safe_float(value: Any, default: float = 0.0) -> float:
+        try:
+            number = float(value)
+        except Exception:
+            return float(default)
+        if np.isnan(number):
+            return float(default)
+        return float(number)
+
+    @staticmethod
+    def _safe_int(value: Any, default: int = 0) -> int:
+        try:
+            number = int(float(value))
+        except Exception:
+            return int(default)
+        return max(0, int(number))
+
+    @classmethod
+    def _normalize_rating_to_five(cls, value: Any) -> float:
+        rating = cls._safe_float(value, 0.0)
+        if rating > 5.0:
+            rating = rating / 2.0
+        return float(max(0.0, min(5.0, rating)))
+
+    @staticmethod
     def _pick_description(row: dict[str, Any]) -> str:
         description = row.get("description", [])
         if isinstance(description, list):
@@ -85,31 +110,38 @@ class MovieCatalog:
             return brand
         return "No description"
 
-    def _load_movielens(self) -> dict[str, dict[str, str]]:
+    def _load_details_csv(self) -> dict[str, dict[str, Any]]:
         details_path = self.dataset_dir / "movies_details_clean.csv"
+        movies: dict[str, dict[str, Any]] = {}
+        if not details_path.exists():
+            return movies
+
+        details = pd.read_csv(details_path)
+        for _, row in details.iterrows():
+            raw_id = row.get("Id")
+            if pd.isna(raw_id):
+                continue
+            movie_id = normalize_item_id(int(raw_id) if str(raw_id).isdigit() else raw_id)
+            if self.item_whitelist is not None and movie_id not in self.item_whitelist:
+                continue
+
+            title = self._safe_text(row.get("Title", "")) or f"Item {movie_id}"
+            overview = self._safe_text(row.get("Overview", ""))
+            genres = self._safe_text(row.get("Genres", ""))
+            poster = self._safe_text(row.get("Poster Path", ""))
+            description = overview or genres or "No description"
+            movies[movie_id] = {
+                "title": title,
+                "description": description,
+                "poster": poster,
+                "rating_value": self._normalize_rating_to_five(row.get("Rating")),
+                "rating_count": self._safe_int(row.get("Vote Count"), 0),
+            }
+        return movies
+
+    def _load_movielens(self) -> dict[str, dict[str, Any]]:
         base_path = self.dataset_dir / "movies.dat"
-        movies: dict[str, dict[str, str]] = {}
-
-        if details_path.exists():
-            details = pd.read_csv(details_path)
-            for _, row in details.iterrows():
-                raw_id = row.get("Id")
-                if pd.isna(raw_id):
-                    continue
-                movie_id = normalize_item_id(int(raw_id) if str(raw_id).isdigit() else raw_id)
-                if self.item_whitelist is not None and movie_id not in self.item_whitelist:
-                    continue
-
-                title = self._safe_text(row.get("Title", "")) or f"Movie {movie_id}"
-                overview = self._safe_text(row.get("Overview", ""))
-                genres = self._safe_text(row.get("Genres", ""))
-                poster = self._safe_text(row.get("Poster Path", ""))
-                description = overview or genres or "No description"
-                movies[movie_id] = {
-                    "title": title,
-                    "description": description,
-                    "poster": poster,
-                }
+        movies = self._load_details_csv()
 
         if base_path.exists():
             with base_path.open("r", encoding="latin-1") as fin:
@@ -125,6 +157,8 @@ class MovieCatalog:
                             "title": parts[1],
                             "description": parts[2].replace("|", ", "),
                             "poster": "",
+                            "rating_value": 0.0,
+                            "rating_count": 0,
                         }
         return movies
 
@@ -146,8 +180,8 @@ class MovieCatalog:
         matches = sorted(raw_dir.glob("meta_*.json.gz")) if raw_dir.exists() else []
         return matches[0] if matches else None
 
-    def _load_amazon(self) -> dict[str, dict[str, str]]:
-        movies: dict[str, dict[str, str]] = {}
+    def _load_amazon(self) -> dict[str, dict[str, Any]]:
+        movies = self._load_details_csv()
         meta_path = self._find_amazon_meta_path()
 
         if meta_path is not None:
@@ -167,6 +201,8 @@ class MovieCatalog:
                         "title": title,
                         "description": description,
                         "poster": poster_name,
+                        "rating_value": float(movies.get(item_id, {}).get("rating_value", 0.0)),
+                        "rating_count": int(movies.get(item_id, {}).get("rating_count", 0)),
                     }
 
         if self.item_whitelist:
@@ -178,10 +214,12 @@ class MovieCatalog:
                     "title": f"Item {item_id}",
                     "description": "No description",
                     "poster": poster_name,
+                    "rating_value": 0.0,
+                    "rating_count": 0,
                 }
         return movies
 
-    def _load_movies(self) -> dict[str, dict[str, str]]:
+    def _load_movies(self) -> dict[str, dict[str, Any]]:
         has_ml1m = (self.dataset_dir / "movies.dat").exists() or (self.dataset_dir / "movies_details_clean.csv").exists()
         if has_ml1m:
             return self._load_movielens()
@@ -208,7 +246,7 @@ class MovieCatalog:
     def has_movie(self, movie_id: str) -> bool:
         return movie_id in self.movies
 
-    def movie_card(self, movie_id: str) -> dict[str, str]:
+    def movie_card(self, movie_id: str) -> dict[str, Any]:
         info = self.movies.get(movie_id, {})
         quoted = quote(movie_id, safe="")
         return {
@@ -216,6 +254,8 @@ class MovieCatalog:
             "title": info.get("title", f"Item {movie_id}"),
             "description": info.get("description", "No description"),
             "image": f"/poster/{self.dataset_key}/{quoted}",
+            "rating_value": float(info.get("rating_value", 0.0) or 0.0),
+            "rating_count": int(info.get("rating_count", 0) or 0),
         }
 
     def poster_path(self, movie_id: str) -> Path | None:

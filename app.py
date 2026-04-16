@@ -182,6 +182,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(16))
 
 recommenders: dict[str, MovieRecommender] = {}
+simulation_stats_store: dict[str, dict[str, dict[str, int]]] = {}
 
 
 def normalize_dataset_key(dataset_key: str | None) -> str:
@@ -246,6 +247,88 @@ def unique_keep_order(item_ids: list[str]) -> list[str]:
     return unique_ids
 
 
+def _fresh_simulation_stats() -> dict[str, dict[str, int]]:
+    return {"impressions": {}, "clicks": {}}
+
+
+def _pop_simulation_stats(simulation_id: str | None) -> None:
+    if simulation_id:
+        simulation_stats_store.pop(str(simulation_id), None)
+
+
+def reset_simulation_stats() -> str:
+    _pop_simulation_stats(session.get("simulation_id"))
+    simulation_id = secrets.token_hex(12)
+    session["simulation_id"] = simulation_id
+    simulation_stats_store[simulation_id] = _fresh_simulation_stats()
+    return simulation_id
+
+
+def get_simulation_stats(create: bool = False) -> dict[str, dict[str, int]]:
+    simulation_id = str(session.get("simulation_id", "") or "")
+    if not simulation_id and create:
+        simulation_id = reset_simulation_stats()
+    if not simulation_id:
+        return _fresh_simulation_stats()
+    return simulation_stats_store.setdefault(simulation_id, _fresh_simulation_stats())
+
+
+def clear_simulation_state() -> None:
+    _pop_simulation_stats(session.get("simulation_id"))
+    session.pop("simulation_id", None)
+    session["history"] = []
+    session["rec_ids"] = []
+    session["page_idx"] = 0
+    session.pop("model_name", None)
+    session.pop("dataset_key", None)
+
+
+def record_card_impressions(cards: list[dict]) -> None:
+    stats = get_simulation_stats(create=True)
+    impressions = stats["impressions"]
+    for item_id in unique_keep_order([str(card.get("id", "")).strip() for card in cards]):
+        if not item_id:
+            continue
+        impressions[item_id] = int(impressions.get(item_id, 0)) + 1
+
+
+def record_item_click(item_id: str) -> None:
+    clean_id = str(item_id or "").strip()
+    if not clean_id:
+        return
+    stats = get_simulation_stats(create=True)
+    clicks = stats["clicks"]
+    clicks[clean_id] = int(clicks.get(clean_id, 0)) + 1
+
+
+def enrich_cards(cards: list[dict], *, track_impressions: bool) -> list[dict]:
+    cards = [dict(card) for card in cards]
+    if track_impressions and cards:
+        record_card_impressions(cards)
+
+    stats = get_simulation_stats(create=track_impressions)
+    impressions = stats.get("impressions", {})
+    clicks = stats.get("clicks", {})
+    out: list[dict] = []
+    for card in cards:
+        item_id = str(card.get("id", "")).strip()
+        rating_value = float(card.get("rating_value", 0.0) or 0.0)
+        rating_value = max(0.0, min(5.0, rating_value))
+        impression_count = int(impressions.get(item_id, 0))
+        click_count = int(clicks.get(item_id, 0))
+        heat_celsius = click_count * 10
+
+        card["rating_value"] = rating_value
+        card["rating_label"] = f"{rating_value:.1f}"
+        card["rating_percent"] = max(0.0, min(100.0, rating_value / 5.0 * 100.0))
+        card["heat_celsius"] = heat_celsius
+        card["heat_label"] = f"{heat_celsius}\u00b0C"
+        card["heat_clicks"] = click_count
+        card["heat_impressions"] = impression_count
+        out.append(card)
+    return out
+
+
 def paginate_cards(recommender: MovieRecommender, item_ids: list[str], page_idx: int) -> list[dict]:
     item_ids = unique_keep_order(item_ids)
     start = page_idx * PAGE_SIZE
@@ -301,10 +384,12 @@ def api_init():
         return jsonify({"error": str(err), "available_datasets": available_datasets()}), 400
 
     model_name = recommender.normalize_model_name(request.args.get("model_name"))
+    reset_simulation_stats()
     cards = [
         recommender.movie_card(mid)
         for mid in recommender.random_movie_ids(PAGE_SIZE, avoid_last_same=True)
     ]
+    cards = enrich_cards(cards, track_impressions=True)
 
     session["history"] = []
     session["rec_ids"] = []
@@ -344,16 +429,18 @@ def api_select():
     prev_dataset_key = session.get("dataset_key")
     if prev_dataset_key != dataset_key:
         history: list[str] = []
+        reset_simulation_stats()
     else:
         history = [str(x) for x in session.get("history", [])]
 
     if movie_id:
+        record_item_click(movie_id)
         history.append(movie_id)
         history = history[-20:]
 
     rec_ids = recommender.recommend_ids(history, model_name=model_name, topk=TOPK)
     rec_ids = unique_keep_order(rec_ids)
-    cards = paginate_cards(recommender, rec_ids, 0)
+    cards = enrich_cards(paginate_cards(recommender, rec_ids, 0), track_impressions=True)
 
     session["history"] = history
     session["rec_ids"] = rec_ids
@@ -410,7 +497,7 @@ def api_next():
         )
 
     page_idx = int(session.get("page_idx", 0)) + 1
-    cards = paginate_cards(recommender, rec_ids, page_idx)
+    cards = enrich_cards(paginate_cards(recommender, rec_ids, page_idx), track_impressions=True)
     if not cards:
         return jsonify(
             {
@@ -444,6 +531,12 @@ def api_next():
             "history": session.get("history", []),
         }
     )
+
+
+@app.route("/api/session/end", methods=["POST"])
+def api_session_end():
+    clear_simulation_state()
+    return jsonify({"ok": True})
 
 
 @app.route("/poster/<dataset_key>/<path:item_id>")

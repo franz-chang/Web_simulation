@@ -19,6 +19,28 @@ function escapeHtml(text) {
     .replaceAll("'", "&#39;");
 }
 
+function formatStars(card) {
+  const percent = Number(card?.rating_percent || 0);
+  const label = escapeHtml(card?.rating_label || "0.0");
+  return `
+    <span class="metric-group rating-group">
+      <span class="metric-label">评分：</span>
+      <span class="stars" style="--rating-percent:${Math.max(0, Math.min(100, percent))}%;" aria-hidden="true"></span>
+      <span class="metric-value">${label}</span>
+    </span>
+  `;
+}
+
+function formatHeat(card) {
+  const heatLabel = escapeHtml(card?.heat_label || "0°C");
+  return `
+    <span class="metric-group heat-group" title="每点击一次增加 10°C">
+      <span class="metric-label">热度：</span>
+      <span class="metric-value">${heatLabel}</span>
+    </span>
+  `;
+}
+
 function modelLabel(modelName) {
   if (modelName === "poprec") return "PopRec";
   if (modelName === "bprmf") return "BPR-MF";
@@ -89,6 +111,10 @@ function renderCards(cards) {
         <img class="poster" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.title)}">
         <div class="content">
           <h3 class="title">${escapeHtml(card.title)}</h3>
+          <div class="card-metrics">
+            ${formatStars(card)}
+            ${formatHeat(card)}
+          </div>
           <p class="desc">${escapeHtml(clip(card.description))}</p>
         </div>
       </article>`
@@ -177,6 +203,12 @@ nextBtn.addEventListener("click", nextPage);
 resetBtn.addEventListener("click", initPage);
 algoSelect.addEventListener("change", initPage);
 datasetSelect.addEventListener("change", initPage);
+
+window.addEventListener("pagehide", () => {
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon("/api/session/end", new Blob([], { type: "application/json" }));
+  }
+});
 
 initPage().catch((err) => {
   statusText.textContent = `初始化失败: ${err.message}`;
