@@ -1,0 +1,440 @@
+{
+  "ml1m": {
+    "sasrec": {
+      "best_epoch": 50,
+      "best_valid_hr": 0.33195364238410596,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.3304635761589404,
+        "NDCG@10": 0.31704696592726794,
+        "HR@20": 0.35016556291390727,
+        "NDCG@20": 0.32197206549033436
+      },
+      "config": {
+        "max_len": 50,
+        "hidden_dim": 64,
+        "num_heads": 2,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "num_items": 3706
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/sasrec_ml1m.pt",
+      "mtime": 1773669584.709822
+    },
+    "lightgcn": {
+      "best_epoch": 59,
+      "best_valid_hr": 0.04321192052980132,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.03543046357615894,
+        "NDCG@10": 0.017578779484652345,
+        "HR@20": 0.06986754966887417,
+        "NDCG@20": 0.026212106359507416
+      },
+      "config": {
+        "num_users": 6040,
+        "num_items": 3706,
+        "embedding_dim": 64,
+        "n_layers": 3,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/lightgcn_ml1m.pt",
+      "mtime": 1773669742.8010952
+    },
+    "multvae": {
+      "best_epoch": 84,
+      "best_valid_hr": 0.07466887417218543,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.06258278145695365,
+        "NDCG@10": 0.029933502333132446,
+        "HR@20": 0.1183774834437086,
+        "NDCG@20": 0.04389974516082871
+      },
+      "config": {
+        "input_dim": 3707,
+        "hidden_dim": 256,
+        "latent_dim": 128,
+        "dropout": 0.5,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/multvae_ml1m.pt",
+      "mtime": 1773669844.5546253
+    },
+    "poprec": {
+      "best_epoch": null,
+      "best_valid_hr": null,
+      "valid_metrics": {
+        "HR@10": 0.04271523178807947,
+        "NDCG@10": 0.020597701220021452,
+        "HR@20": 0.0706953642384106,
+        "NDCG@20": 0.027623412169896402
+      },
+      "test_metrics": {
+        "HR@10": 0.03676714143756211,
+        "NDCG@10": 0.017947601972163597,
+        "HR@20": 0.06773766147731036,
+        "NDCG@20": 0.02567071468454975
+      },
+      "config": {
+        "num_items": 3706
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/poprec_ml1m.pt",
+      "mtime": 1775563611.5389233
+    },
+    "bprmf": {
+      "best_epoch": 317,
+      "best_valid_hr": 0.0380794701986755,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.035927152317880795,
+        "NDCG@10": 0.01722444132553623,
+        "HR@20": 0.06539735099337748,
+        "NDCG@20": 0.02465926738749846
+      },
+      "config": {
+        "num_users": 6040,
+        "num_items": 3706,
+        "embedding_dim": 256,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bprmf_ml1m.pt",
+      "mtime": 1775570886.8618913
+    },
+    "gru4rec": {
+      "best_epoch": 30,
+      "best_valid_hr": 0.15827814569536425,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.10877483443708609,
+        "NDCG@10": 0.055329322089773474,
+        "HR@20": 0.16622516556291392,
+        "NDCG@20": 0.06978233926586788
+      },
+      "config": {
+        "num_items": 3706,
+        "max_len": 50,
+        "embedding_dim": 64,
+        "hidden_dim": 128,
+        "num_layers": 1,
+        "dropout": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/gru4rec_ml1m.pt",
+      "mtime": 1775565527.6663635
+    },
+    "bert4rec": {
+      "best_epoch": 59,
+      "best_valid_hr": 0.21324503311258278,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.1718543046357616,
+        "NDCG@10": 0.08736804945961624,
+        "HR@20": 0.2582781456953642,
+        "NDCG@20": 0.10902260286781171
+      },
+      "config": {
+        "num_items": 3706,
+        "max_len": 50,
+        "hidden_dim": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "mask_prob": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bert4rec_ml1m.pt",
+      "mtime": 1775570886.8667333
+    }
+  },
+  "amazon_all_beauty": {
+    "sasrec": {
+      "best_epoch": 1,
+      "best_valid_hr": 1.0,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 1.0,
+        "NDCG@10": 1.0,
+        "HR@20": 1.0,
+        "NDCG@20": 1.0
+      },
+      "config": {
+        "max_len": 50,
+        "hidden_dim": 64,
+        "num_heads": 2,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "num_items": 303
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/sasrec_amazon_all_beauty.pt",
+      "mtime": 1776249422.527099
+    },
+    "lightgcn": {
+      "best_epoch": 30,
+      "best_valid_hr": 0.4768211920529801,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.3841059602649007,
+        "NDCG@10": 0.3246653316195079,
+        "HR@20": 0.4370860927152318,
+        "NDCG@20": 0.3375370502606598
+      },
+      "config": {
+        "num_users": 151,
+        "num_items": 303,
+        "embedding_dim": 64,
+        "n_layers": 3,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/lightgcn_amazon_all_beauty.pt",
+      "mtime": 1776249426.4299638
+    },
+    "multvae": {
+      "best_epoch": 23,
+      "best_valid_hr": 0.5695364238410596,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.543046357615894,
+        "NDCG@10": 0.3726372864926264,
+        "HR@20": 0.543046357615894,
+        "NDCG@20": 0.3726372864926264
+      },
+      "config": {
+        "input_dim": 304,
+        "hidden_dim": 256,
+        "latent_dim": 128,
+        "dropout": 0.5,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/multvae_amazon_all_beauty.pt",
+      "mtime": 1776249428.956827
+    },
+    "poprec": {
+      "best_epoch": null,
+      "best_valid_hr": null,
+      "valid_metrics": {
+        "HR@10": 0.7433628318584071,
+        "NDCG@10": 0.5132799069959543,
+        "HR@20": 0.7610619469026548,
+        "NDCG@20": 0.5178364441335255
+      },
+      "test_metrics": {
+        "HR@10": 0.7735849056603774,
+        "NDCG@10": 0.534847278412844,
+        "HR@20": 0.7735849056603774,
+        "NDCG@20": 0.534847278412844
+      },
+      "config": {
+        "num_items": 303
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/poprec_amazon_all_beauty.pt",
+      "mtime": 1776249430.8772044
+    },
+    "bprmf": {
+      "best_epoch": 43,
+      "best_valid_hr": 0.3708609271523179,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.23178807947019867,
+        "NDCG@10": 0.1959264035523107,
+        "HR@20": 0.271523178807947,
+        "NDCG@20": 0.20556866474395927
+      },
+      "config": {
+        "num_users": 151,
+        "num_items": 303,
+        "embedding_dim": 64,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bprmf_amazon_all_beauty.pt",
+      "mtime": 1776249436.939102
+    },
+    "gru4rec": {
+      "best_epoch": 26,
+      "best_valid_hr": 0.5298013245033113,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.5364238410596026,
+        "NDCG@10": 0.383051287516357,
+        "HR@20": 0.5364238410596026,
+        "NDCG@20": 0.383051287516357
+      },
+      "config": {
+        "num_items": 303,
+        "max_len": 50,
+        "embedding_dim": 64,
+        "hidden_dim": 128,
+        "num_layers": 1,
+        "dropout": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/gru4rec_amazon_all_beauty.pt",
+      "mtime": 1776249441.6963353
+    },
+    "bert4rec": {
+      "best_epoch": 19,
+      "best_valid_hr": 0.5695364238410596,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.5231788079470199,
+        "NDCG@10": 0.47668931426423805,
+        "HR@20": 0.5562913907284768,
+        "NDCG@20": 0.48554302712860287
+      },
+      "config": {
+        "num_items": 303,
+        "max_len": 50,
+        "hidden_dim": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "mask_prob": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bert4rec_amazon_all_beauty.pt",
+      "mtime": 1776249448.3992953
+    }
+  },
+  "amazon_magazine_subscriptions": {
+    "sasrec": {
+      "best_epoch": 1,
+      "best_valid_hr": 1.0,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 1.0,
+        "NDCG@10": 1.0,
+        "HR@20": 1.0,
+        "NDCG@20": 1.0
+      },
+      "config": {
+        "max_len": 50,
+        "hidden_dim": 64,
+        "num_heads": 2,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "num_items": 392
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/sasrec_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249461.8388643
+    },
+    "lightgcn": {
+      "best_epoch": 30,
+      "best_valid_hr": 0.19830028328611898,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.1954674220963173,
+        "NDCG@10": 0.10598217692846519,
+        "HR@20": 0.29178470254957506,
+        "NDCG@20": 0.13022650593115598
+      },
+      "config": {
+        "num_users": 353,
+        "num_items": 392,
+        "embedding_dim": 64,
+        "n_layers": 3,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/lightgcn_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249465.209238
+    },
+    "multvae": {
+      "best_epoch": 29,
+      "best_valid_hr": 0.22662889518413598,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.16997167138810199,
+        "NDCG@10": 0.07219139523418033,
+        "HR@20": 0.311614730878187,
+        "NDCG@20": 0.1081298440963795
+      },
+      "config": {
+        "input_dim": 393,
+        "hidden_dim": 256,
+        "latent_dim": 128,
+        "dropout": 0.5,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/multvae_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249467.4956605
+    },
+    "poprec": {
+      "best_epoch": null,
+      "best_valid_hr": null,
+      "valid_metrics": {
+        "HR@10": 0.20123839009287925,
+        "NDCG@10": 0.09423906612436217,
+        "HR@20": 0.3188854489164087,
+        "NDCG@20": 0.12341598817532147
+      },
+      "test_metrics": {
+        "HR@10": 0.140625,
+        "NDCG@10": 0.05936684527801687,
+        "HR@20": 0.309375,
+        "NDCG@20": 0.10047851503615579
+      },
+      "config": {
+        "num_items": 392
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/poprec_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249468.7709985
+    },
+    "bprmf": {
+      "best_epoch": 49,
+      "best_valid_hr": 0.0679886685552408,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.059490084985835696,
+        "NDCG@10": 0.04082254996666615,
+        "HR@20": 0.09915014164305949,
+        "NDCG@20": 0.05063259169705035
+      },
+      "config": {
+        "num_users": 353,
+        "num_items": 392,
+        "embedding_dim": 64,
+        "max_history": 50
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bprmf_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249474.4315677
+    },
+    "gru4rec": {
+      "best_epoch": 11,
+      "best_valid_hr": 0.1954674220963173,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.13031161473087818,
+        "NDCG@10": 0.05778166396623886,
+        "HR@20": 0.23796033994334279,
+        "NDCG@20": 0.08521009356921412
+      },
+      "config": {
+        "num_items": 392,
+        "max_len": 50,
+        "embedding_dim": 64,
+        "hidden_dim": 128,
+        "num_layers": 1,
+        "dropout": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/gru4rec_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249479.8711538
+    },
+    "bert4rec": {
+      "best_epoch": 28,
+      "best_valid_hr": 0.24362606232294617,
+      "valid_metrics": null,
+      "test_metrics": {
+        "HR@10": 0.2237960339943343,
+        "NDCG@10": 0.12166720884898069,
+        "HR@20": 0.32294617563739375,
+        "NDCG@20": 0.1470030272082981
+      },
+      "config": {
+        "num_items": 392,
+        "max_len": 50,
+        "hidden_dim": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "mask_prob": 0.2
+      },
+      "artifact": "/Users/chongzhang/Web_sim/artifacts/bert4rec_amazon_magazine_subscriptions.pt",
+      "mtime": 1776249492.189494
+    }
+  }
+}
