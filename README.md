@@ -1,5 +1,7 @@
 # WebSim 推荐系统交互仿真平台
 
+![What is WebSim](Method.png "WebSim Platform")
+
 `WebSim` 是一个基于 Flask 的本地推荐系统仿真平台，提供两种交互页面：
 
 - 网格页（`/`）：4 卡片展示，支持点击与翻页
