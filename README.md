@@ -4,12 +4,10 @@
 
 `WebSim` 是一个基于 Flask 的本地推荐系统仿真平台，提供两种交互页面：
 
-- 网格页（`/`）：4 卡片展示，支持点击与翻页
-- 滑动页（`/swipe`）：上下滑（含键盘上下键）浏览推荐
+- 网格页（`/`）：M X N卡片展示，支持点击与翻页, 主要模拟的Browser Web端
+- 滑动页（`/swipe`）：上下滑（含键盘上下键）浏览推荐， 主要模拟的移动端短视频浏览场景。
 
 当前服务支持 3 个数据集和 7 个推荐模型，并可按会话记录曝光/点击统计，实时展示评分与热度。
-
-> 路径说明：本文档默认使用 `/Users/chongzhang/WebSim`。若你本地目录仍为旧名 `/Users/chongzhang/Web_sim`，请将命令中的路径替换为旧目录即可。
 
 ## 当前能力（与代码一致）
 
@@ -44,7 +42,7 @@
 - `artifacts/`：模型权重与训练日志
 - `docs/`：系统图与 UML 文档
 
-## 环境安装
+## Start：环境安装
 
 ```bash
 cd /Users/chongzhang/WebSim
@@ -68,18 +66,10 @@ pip install -r requirements.txt
 - `../WebSim_Dataset/MM-ML-1M-main`
 - `../WebSim_Dataset/Amazon_MM_2018/All_Beauty`
 - `../WebSim_Dataset/Amazon_MM_2018/Magazine_Subscriptions`
+- `../WebSim_Dataset/Amazon_MM_2018/Magazine_Subscriptions`
 
-### MovieLens-1M 最低要求
+各种新匹配持续更新中........
 
-- `ratings.dat`
-- `movies.dat`
-- 可选：`movies_details_clean.csv`、`posters/`
-
-### Amazon_MM_2018 最低要求
-
-- `raw/*.json.gz`（review 文件）
-- `raw/meta_*.json.gz`（meta 文件，建议提供）
-- 可选：`movies_details_clean.csv`、`posters/` 或 `images/`
 
 ## 快速启动
 
@@ -99,7 +89,7 @@ PORT=19001 python3 app.py
 ### 2) 推荐使用脚本启动滑动页（默认 19002）
 
 ```bash
-cd /Users/chongzhang/WebSim
+cd ./WebSim
 ./scripts/run_swipe_page.sh
 ./scripts/stop_swipe_page.sh
 ```
@@ -129,7 +119,7 @@ PORT=19002 ./scripts/stop_swipe_page.sh
 
 ### `GET /api/init?dataset_key=...&model_name=...`
 
-初始化会话并返回第一屏随机卡片（4 条）。
+初始化会话并返回第一屏随机卡片（默认为 4 条）。
 
 ### `POST /api/select`
 
