@@ -35,7 +35,7 @@
   - `POST /api/session/end`
   - `GET /poster/<dataset_key>/<item_id>`
 
-## 目录结构（关键）
+## 目录结构
 
 - `app.py`：Flask 入口与 API
 - `recommender.py`：数据目录解析、模型引擎封装、卡片生成
@@ -77,7 +77,7 @@ pip install -r requirements.txt
 
 ## 快速启动
 
-### 1) 直接启动 Flask（默认 19001，首页网格页）
+### 1) 直接启动 Flask
 
 ```bash
 cd /Users/chongzhang/WebSim
@@ -90,7 +90,7 @@ PORT=19001 python3 app.py
 - 滑动页：`http://127.0.0.1:19001/swipe`
 - 健康检查：`http://127.0.0.1:19001/health`
 
-### 2) 推荐使用脚本启动滑动页（默认 19002）
+### 2) 推荐使用脚本启动滑动页
 
 ```bash
 cd ./WebSim
@@ -153,7 +153,7 @@ PORT=19002 ./scripts/stop_swipe_page.sh
 
 ## 训练模型
 
-### 单模型训练（示例）
+### 单模型训练
 
 ```bash
 cd /Users/chongzhang/WebSim
@@ -215,7 +215,7 @@ cd /Users/chongzhang/WebSim
 - `FLASK_SECRET_KEY`
 - `WEBSIM_INIT_RANDOM_SEED`（初始化随机采样种子，默认 `42`）
 
-### 模型权重路径（示例）
+### 模型权重路径
 
 - ML1M 支持：
   - `SASREC_ML1M_MODEL_PATH`（或 `SASREC_MODEL_PATH`）
