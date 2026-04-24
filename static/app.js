@@ -3,6 +3,7 @@ const nextBtn = document.getElementById("nextBtn");
 const resetBtn = document.getElementById("resetBtn");
 const algoSelect = document.getElementById("algoSelect");
 const datasetSelect = document.getElementById("datasetSelect");
+const historyCommentSelect = document.getElementById("historyCommentSelect");
 const statusText = document.getElementById("statusText");
 
 function clip(text, maxLen = 110) {
@@ -19,12 +20,17 @@ function escapeHtml(text) {
     .replaceAll("'", "&#39;");
 }
 
+function historyCommentsEnabled() {
+  if (!historyCommentSelect) return true;
+  return historyCommentSelect.value !== "hide";
+}
+
 function formatStars(card) {
   const percent = Number(card?.rating_percent || 0);
   const label = escapeHtml(card?.rating_label || "0.0");
   return `
     <span class="metric-group rating-group">
-      <span class="metric-label">评分：</span>
+      <span class="metric-label">Rating:</span>
       <span class="stars" style="--rating-percent:${Math.max(0, Math.min(100, percent))}%;" aria-hidden="true"></span>
       <span class="metric-value">${label}</span>
     </span>
@@ -36,8 +42,8 @@ function formatHeat(card) {
   const base = Number(card?.heat_base || 0);
   const interaction = Number(card?.heat_interaction || 0);
   return `
-    <span class="metric-group heat-group" title="热度=历史基线+会话增量（曝光+2°C，点击+10°C）">
-      <span class="metric-label">热度：</span>
+    <span class="metric-group heat-group" title="Heat = historical baseline + session increment (impression +2°C, click +10°C)">
+      <span class="metric-label">Heat:</span>
       <span class="metric-value">${heatLabel}</span>
       <span class="metric-subtle">(${Math.max(0, base)}+${Math.max(0, interaction)})</span>
     </span>
@@ -101,35 +107,91 @@ function applyAvailableDatasets(datasets, selectedDataset) {
   }
 }
 
+function formatCommentRows(movieId, comments) {
+  const rows = Array.isArray(comments) ? comments : [];
+  if (rows.length === 0) {
+    return `<div class="comment-empty">No comments yet.</div>`;
+  }
+
+  return rows
+    .map((comment) => {
+      const commentId = escapeHtml(comment?.id || "");
+      const text = escapeHtml(comment?.text || "");
+      const likeCount = Number(comment?.like_count || 0);
+      return `
+        <div class="comment-row">
+          <span class="comment-text">${text}</span>
+          <button class="comment-like-btn" type="button" data-comment-id="${commentId}" data-movie-id="${escapeHtml(movieId)}">
+            👍 ${Math.max(0, likeCount)}
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 function renderCards(cards) {
   if (!cards || cards.length === 0) {
-    grid.innerHTML = `<div class="empty">没有更多推荐了，你可以点击“随机重置”重新开始。</div>`;
+    grid.innerHTML = `<div class="empty">No more recommendations are available. Click "Random Reset" to start again.</div>`;
     return;
   }
 
   grid.innerHTML = cards
-    .map(
-      (card) => `
-      <article class="card" data-movie-id="${escapeHtml(card.id)}">
-        <img class="poster" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.title)}">
-        <div class="content">
-          <h3 class="title">${escapeHtml(card.title)}</h3>
-          <div class="card-metrics">
-            ${formatStars(card)}
-            ${formatHeat(card)}
+    .map((card) => {
+      const movieId = escapeHtml(card.id);
+      return `
+        <article class="card" data-movie-id="${movieId}">
+          <div class="card-main" data-movie-id="${movieId}">
+            <img class="poster" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.title)}">
+            <div class="content">
+              <h3 class="title">${escapeHtml(card.title)}</h3>
+              <div class="card-metrics">
+                ${formatStars(card)}
+                ${formatHeat(card)}
+              </div>
+              <p class="desc">${escapeHtml(clip(card.description))}</p>
+            </div>
           </div>
-          <p class="desc">${escapeHtml(clip(card.description))}</p>
-        </div>
-      </article>`
-    )
+          <section class="comment-block">
+            <div class="comment-list" data-movie-id="${movieId}">
+              ${formatCommentRows(card.id, card.comments)}
+            </div>
+            <div class="comment-compose">
+              <input
+                class="comment-input"
+                type="text"
+                maxlength="500"
+                data-movie-id="${movieId}"
+                placeholder="Write a comment..."
+              >
+              <button class="comment-submit-btn" type="button" data-movie-id="${movieId}">Post</button>
+            </div>
+          </section>
+        </article>
+      `;
+    })
     .join("");
+}
 
-  document.querySelectorAll(".card").forEach((el) => {
-    el.addEventListener("click", async () => {
-      const movieId = el.dataset.movieId;
-      await selectMovie(movieId);
-    });
+function updateCommentList(movieId, comments) {
+  const targetId = String(movieId || "");
+  document.querySelectorAll(".comment-list").forEach((el) => {
+    if (el.dataset.movieId === targetId) {
+      el.innerHTML = formatCommentRows(targetId, comments);
+    }
   });
+}
+
+function findCommentInput(movieId) {
+  const targetId = String(movieId || "");
+  const inputs = Array.from(document.querySelectorAll(".comment-input"));
+  return inputs.find((el) => String(el.dataset.movieId || "") === targetId) || null;
+}
+
+function visibleMovieIds() {
+  return Array.from(document.querySelectorAll(".card[data-movie-id]"))
+    .map((el) => String(el.dataset.movieId || "").trim())
+    .filter(Boolean);
 }
 
 async function fetchJSON(url, options = {}) {
@@ -144,10 +206,10 @@ async function fetchJSON(url, options = {}) {
 async function initPage() {
   const modelName = algoSelect.value;
   const datasetKey = datasetSelect.value;
-  statusText.textContent = `初始化随机推荐（${datasetLabel(datasetKey)} / ${modelLabel(modelName)}）...`;
+  statusText.textContent = `Initializing random recommendations (${datasetLabel(datasetKey)} / ${modelLabel(modelName)})...`;
 
   const data = await fetchJSON(
-    `/api/init?dataset_key=${encodeURIComponent(datasetKey)}&model_name=${encodeURIComponent(modelName)}`
+    `/api/init?dataset_key=${encodeURIComponent(datasetKey)}&model_name=${encodeURIComponent(modelName)}&include_history_comments=${historyCommentsEnabled() ? "1" : "0"}`
   );
 
   applyAvailableDatasets(data.available_datasets, data.dataset_key);
@@ -156,9 +218,9 @@ async function initPage() {
 
   nextBtn.disabled = true;
   if ((data.available_models || []).length === 0) {
-    statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} 当前无可用模型，显示随机样本。`;
+    statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} currently has no available model, so random samples are shown.`;
   } else {
-    statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)}：初始随机 4 个样本（当前模型：${modelLabel(data.model_name)}）`;
+    statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)}: loaded 4 initial random samples (current model: ${modelLabel(data.model_name)}).`;
   }
 }
 
@@ -166,12 +228,17 @@ async function selectMovie(movieId) {
   const modelName = algoSelect.value;
   const datasetKey = datasetSelect.value;
 
-  statusText.textContent = `已点击 ${movieId}，正在请求 ${datasetLabel(datasetKey)} / ${modelLabel(modelName)} 推荐...`;
+  statusText.textContent = `Clicked ${movieId}. Requesting recommendations from ${datasetLabel(datasetKey)} / ${modelLabel(modelName)}...`;
 
   const data = await fetchJSON("/api/select", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ movie_id: movieId, model_name: modelName, dataset_key: datasetKey }),
+    body: JSON.stringify({
+      movie_id: movieId,
+      model_name: modelName,
+      dataset_key: datasetKey,
+      include_history_comments: historyCommentsEnabled(),
+    }),
   });
 
   applyAvailableDatasets(data.available_datasets, data.dataset_key);
@@ -179,17 +246,20 @@ async function selectMovie(movieId) {
   renderCards(data.cards);
 
   nextBtn.disabled = !data.has_next;
-  statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} 推荐第 ${data.page} 页（每页 4 个）`;
+  statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} page ${data.page} recommendations (4 items per page).`;
 }
 
 async function nextPage() {
   const datasetKey = datasetSelect.value;
-  statusText.textContent = "加载下一页...";
+  statusText.textContent = "Loading the next page...";
 
   const data = await fetchJSON("/api/next", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dataset_key: datasetKey }),
+    body: JSON.stringify({
+      dataset_key: datasetKey,
+      include_history_comments: historyCommentsEnabled(),
+    }),
   });
 
   applyAvailableDatasets(data.available_datasets, data.dataset_key);
@@ -198,14 +268,126 @@ async function nextPage() {
 
   nextBtn.disabled = !data.has_next;
   statusText.textContent = data.cards.length
-    ? `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} 推荐第 ${data.page} 页（每页 4 个）`
-    : (data.message || "没有更多推荐了");
+    ? `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} page ${data.page} recommendations (4 items per page).`
+    : (data.message || "No more recommendations are available.");
+}
+
+async function submitComment(movieId, inputEl) {
+  const text = String(inputEl?.value || "").trim();
+  if (!text) {
+    statusText.textContent = "Please enter a comment before posting.";
+    return;
+  }
+  if (!inputEl) return;
+
+  inputEl.disabled = true;
+  statusText.textContent = "Saving comment...";
+  try {
+    const data = await fetchJSON("/api/comment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset_key: datasetSelect.value,
+        item_id: movieId,
+        text,
+        include_history_comments: historyCommentsEnabled(),
+      }),
+    });
+    updateCommentList(movieId, data.comments || []);
+    inputEl.value = "";
+    statusText.textContent = "Comment saved.";
+  } catch (err) {
+    statusText.textContent = `Failed to save comment: ${err.message}`;
+  } finally {
+    inputEl.disabled = false;
+    inputEl.focus();
+  }
+}
+
+async function likeComment(commentId, movieId, btnEl) {
+  if (btnEl) btnEl.disabled = true;
+  try {
+    const data = await fetchJSON("/api/comment/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        comment_id: commentId,
+        include_history_comments: historyCommentsEnabled(),
+      }),
+    });
+    updateCommentList(movieId, data.comments || []);
+    statusText.textContent = "Like recorded for current simulation.";
+  } catch (err) {
+    statusText.textContent = `Failed to like comment: ${err.message}`;
+  } finally {
+    if (btnEl) btnEl.disabled = false;
+  }
+}
+
+async function refreshVisibleComments() {
+  const movieIds = visibleMovieIds();
+  if (movieIds.length === 0) return;
+
+  try {
+    const data = await fetchJSON(
+      `/api/comments?dataset_key=${encodeURIComponent(datasetSelect.value)}&include_history_comments=${historyCommentsEnabled() ? "1" : "0"}&item_ids=${encodeURIComponent(movieIds.join(","))}`
+    );
+    const commentsByItem = data?.comments_by_item || {};
+    movieIds.forEach((movieId) => {
+      updateCommentList(movieId, commentsByItem[movieId] || []);
+    });
+    statusText.textContent = historyCommentsEnabled()
+      ? "Historical comments are now visible."
+      : "Historical comments are now hidden.";
+  } catch (err) {
+    statusText.textContent = `Failed to refresh comments: ${err.message}`;
+  }
 }
 
 nextBtn.addEventListener("click", nextPage);
 resetBtn.addEventListener("click", initPage);
 algoSelect.addEventListener("change", initPage);
 datasetSelect.addEventListener("change", initPage);
+
+if (historyCommentSelect) {
+  historyCommentSelect.addEventListener("change", refreshVisibleComments);
+}
+
+grid.addEventListener("click", (event) => {
+  const submitBtn = event.target.closest(".comment-submit-btn");
+  if (submitBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    const movieId = String(submitBtn.dataset.movieId || "").trim();
+    const inputEl = findCommentInput(movieId);
+    submitComment(movieId, inputEl);
+    return;
+  }
+
+  const likeBtn = event.target.closest(".comment-like-btn");
+  if (likeBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    const commentId = String(likeBtn.dataset.commentId || "").trim();
+    const movieId = String(likeBtn.dataset.movieId || "").trim();
+    likeComment(commentId, movieId, likeBtn);
+    return;
+  }
+
+  const cardMain = event.target.closest(".card-main");
+  if (cardMain) {
+    const movieId = String(cardMain.dataset.movieId || "").trim();
+    if (movieId) selectMovie(movieId);
+  }
+});
+
+grid.addEventListener("keydown", (event) => {
+  const inputEl = event.target.closest(".comment-input");
+  if (!inputEl || event.key !== "Enter") return;
+  event.preventDefault();
+  const movieId = String(inputEl.dataset.movieId || "").trim();
+  submitComment(movieId, inputEl);
+});
 
 window.addEventListener("pagehide", () => {
   if (navigator.sendBeacon) {
@@ -214,5 +396,5 @@ window.addEventListener("pagehide", () => {
 });
 
 initPage().catch((err) => {
-  statusText.textContent = `初始化失败: ${err.message}`;
+  statusText.textContent = `Initialization failed: ${err.message}`;
 });

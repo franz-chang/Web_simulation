@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "comments": [
+    {
+      "id": "1e24713b1a6874cf",
+      "dataset_key": "ml1m",
+      "item_id": "2855",
+      "text": "test comment from automated check",
+      "created_at": "2026-04-24T07:13:13Z",
+      "simulation_id": "016307371f3e208d3915b609"
+    },
+    {
+      "id": "87dac4fe3bf6acf5",
+      "dataset_key": "ml1m",
+      "item_id": "1925",
+      "text": "good",
+      "created_at": "2026-04-24T07:16:33Z",
+      "simulation_id": "978564fed80dc98314f809d5"
+    },
+    {
+      "id": "672893444877e10c",
+      "dataset_key": "ml1m",
+      "item_id": "260",
+      "text": "Classical movie",
+      "created_at": "2026-04-24T07:17:04Z",
+      "simulation_id": "00998984ef5abef1cb37d602"
+    }
+  ]
+}

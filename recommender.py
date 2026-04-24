@@ -1,7 +1,9 @@
 import ast
 import gzip
+import html
 import json
 import random
+import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -31,6 +33,46 @@ def candidate_item_keys(item_id: str) -> list[Any]:
 
 
 class MovieCatalog:
+    _HTML_TITLE_MARKERS = ("<span", "<div", "<", "a-size-medium", "a-color-secondary")
+    _TITLE_STOPWORDS = {
+        "this",
+        "written",
+        "produced",
+        "get",
+        "from",
+        "learn",
+        "viewpoint",
+        "regular",
+    }
+    _LEGAL_SUFFIX_RE = re.compile(r"(?:,?\s+(?:llc|inc\.?|ltd\.?|corp\.?|corporation|co\.?))+$", re.I)
+    _TITLE_PATTERNS = (
+        re.compile(
+            r"^\s*([A-Z0-9][A-Za-z0-9&'’ +/:()\-]{1,80}?)\s+magazine\s+"
+            r"(?:is|offers|features|includes|brings|covers|presents|requires|delivers)\b",
+            re.I,
+        ),
+        re.compile(
+            r"^\s*([A-Z0-9][A-Za-z0-9&'’ +/:()\-]{1,80}?)\s+"
+            r"(?:is|are|was|were|offers|offer|includes|include|presents|brings|"
+            r"requires|delivers|covers|focuses|edited|published)\b",
+            re.I,
+        ),
+        re.compile(
+            r"(?:^|[,.]\s+)([A-Z0-9][A-Za-z0-9&'’ +/:()\-]{1,80}?)\s+magazine\s+"
+            r"(?:is|offers|features|includes|brings|covers|presents|requires|delivers)\b",
+            re.I,
+        ),
+        re.compile(
+            r"^\s*([A-Z0-9][A-Za-z0-9&'’ +/:()\-]{1,80}?),\s+"
+            r"(?:every|the|with|from|edited|written)\b",
+            re.I,
+        ),
+        re.compile(
+            r"^\s*turn\s+to\s+([A-Z0-9][A-Za-z0-9&'’ +/:()\-]{1,80}?),\s+",
+            re.I,
+        ),
+    )
+
     def __init__(
         self,
         dataset_key: str,
@@ -60,8 +102,81 @@ class MovieCatalog:
 
     @staticmethod
     def _safe_text(value: Any) -> str:
-        text = str(value or "").strip()
+        text = html.unescape(str(value or "")).strip()
+        text = re.sub(r"\s+", " ", text)
         return "" if text.lower() == "nan" else text
+
+    @classmethod
+    def _is_bad_title(cls, title: str) -> bool:
+        text = cls._safe_text(title).lower()
+        if not text:
+            return True
+        return any(marker in text for marker in cls._HTML_TITLE_MARKERS)
+
+    @classmethod
+    def _clean_candidate_title(cls, title: str) -> str:
+        text = cls._safe_text(title).strip(" \t\r\n\"'`.,;:-")
+        if not text:
+            return ""
+        if cls._is_bad_title(text):
+            return ""
+        if any(ch in text for ch in ".?!"):
+            return ""
+        if len(text.split()) > 8:
+            return ""
+        lowered = text.lower()
+        if lowered.startswith(("written by ", "produced by ", "turn to ", "get ", "learn ")):
+            return ""
+        if text.lower() in cls._TITLE_STOPWORDS:
+            return ""
+        return text
+
+    @classmethod
+    def _infer_title_from_text(cls, text: Any) -> str:
+        if isinstance(text, list):
+            source = " ".join(cls._safe_text(part) for part in text if cls._safe_text(part))
+        else:
+            source = cls._safe_text(text)
+        if not source:
+            return ""
+        for pattern in cls._TITLE_PATTERNS:
+            match = pattern.search(source)
+            if not match:
+                continue
+            candidate = cls._clean_candidate_title(match.group(1))
+            if candidate:
+                return candidate
+        return ""
+
+    @classmethod
+    def _infer_title_from_brand(cls, brand: Any) -> str:
+        text = cls._safe_text(brand)
+        if not text:
+            return ""
+        text = cls._LEGAL_SUFFIX_RE.sub("", text).strip(" \t\r\n\"'`.,;:-")
+        return cls._clean_candidate_title(text)
+
+    @classmethod
+    def _resolve_display_title(
+        cls,
+        raw_title: Any,
+        *,
+        text_sources: tuple[Any, ...] = (),
+        brand_sources: tuple[Any, ...] = (),
+        default: str,
+    ) -> str:
+        title = cls._clean_candidate_title(raw_title)
+        if title:
+            return title
+        for source in text_sources:
+            inferred = cls._infer_title_from_text(source)
+            if inferred:
+                return inferred
+        for source in brand_sources:
+            inferred = cls._infer_title_from_brand(source)
+            if inferred:
+                return inferred
+        return default
 
     @staticmethod
     def _safe_float(value: Any, default: float = 0.0) -> float:
@@ -125,7 +240,12 @@ class MovieCatalog:
             if self.item_whitelist is not None and movie_id not in self.item_whitelist:
                 continue
 
-            title = self._safe_text(row.get("Title", "")) or f"Item {movie_id}"
+            title = self._resolve_display_title(
+                row.get("Title", ""),
+                text_sources=(row.get("Overview", ""),),
+                brand_sources=(row.get("Directors", ""), row.get("Actors", "")),
+                default=f"Item {movie_id}",
+            )
             overview = self._safe_text(row.get("Overview", ""))
             genres = self._safe_text(row.get("Genres", ""))
             poster = self._safe_text(row.get("Poster Path", ""))
@@ -194,7 +314,12 @@ class MovieCatalog:
                     if self.item_whitelist is not None and item_id not in self.item_whitelist:
                         continue
 
-                    title = self._safe_text(row.get("title", "")) or f"Item {item_id}"
+                    title = self._resolve_display_title(
+                        row.get("title", ""),
+                        text_sources=(row.get("description", ""),),
+                        brand_sources=(row.get("brand", ""),),
+                        default=f"Item {item_id}",
+                    )
                     description = self._pick_description(row)
                     poster_name = f"{item_id}.jpg" if (self.image_dir / f"{item_id}.jpg").exists() else ""
                     movies[item_id] = {

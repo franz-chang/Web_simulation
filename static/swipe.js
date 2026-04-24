@@ -51,7 +51,7 @@ function syncMeta() {
     modelBadge.textContent = modelLabel(algoSelect.value);
   }
   if (indexBadge) {
-    indexBadge.textContent = feedState.cursor >= 0 ? `第 ${feedState.cursor + 1} 条` : "第 0 条";
+    indexBadge.textContent = feedState.cursor >= 0 ? `Item ${feedState.cursor + 1}` : "Item 0";
   }
 }
 
@@ -122,16 +122,16 @@ function syncButtons() {
 function renderCard(card, withAnimation = false) {
   if (!card) {
     swipePoster.src = "";
-    swipePoster.alt = "暂无推荐内容";
-    swipeTitle.textContent = "暂无推荐";
-    swipeDesc.textContent = "请点击“随机重置按钮”重新加载。";
+    swipePoster.alt = "No recommendation available";
+    swipeTitle.textContent = "No Recommendation Available";
+    swipeDesc.textContent = 'Click "Random Reset" to load a new item.';
     return;
   }
 
   swipePoster.src = String(card.image || "");
-  swipePoster.alt = String(card.title || "推荐内容");
-  swipeTitle.textContent = String(card.title || "未知标题");
-  swipeDesc.textContent = clip(String(card.description || "暂无简介"));
+  swipePoster.alt = String(card.title || "Recommended content");
+  swipeTitle.textContent = String(card.title || "Untitled Item");
+  swipeDesc.textContent = clip(String(card.description || "No description available."));
 
   if (withAnimation) {
     swipeCard.classList.remove("card-enter");
@@ -156,7 +156,7 @@ async function initFeed() {
 
   const modelName = algoSelect.value;
   const datasetKey = datasetSelect.value;
-  statusText.textContent = `初始化中：${datasetLabel(datasetKey)} / ${modelLabel(modelName)} ...`;
+  statusText.textContent = `Initializing: ${datasetLabel(datasetKey)} / ${modelLabel(modelName)} ...`;
 
   try {
     const data = await fetchJSON(
@@ -176,14 +176,14 @@ async function initFeed() {
       feedState.cursor = 0;
       feedState.queue = cards.slice(1);
       renderCard(cards[0], true);
-      statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} 已加载第一条内容`;
+      statusText.textContent = `${data.dataset_label || datasetLabel(data.dataset_key)} / ${modelLabel(data.model_name)} loaded the first item.`;
     } else {
       renderCard(null);
-      statusText.textContent = "初始化后没有可展示内容，请重置重试。";
+      statusText.textContent = "No content is available after initialization. Please try Random Reset.";
     }
   } catch (err) {
     renderCard(null);
-    statusText.textContent = `初始化失败: ${err.message}`;
+    statusText.textContent = `Initialization failed: ${err.message}`;
   } finally {
     feedState.loading = false;
     syncButtons();
@@ -193,12 +193,12 @@ async function initFeed() {
 function moveUp() {
   if (feedState.loading) return;
   if (feedState.cursor <= 0) {
-    statusText.textContent = "已经到最上方了。";
+    statusText.textContent = "You are already at the first item.";
     return;
   }
   feedState.cursor -= 1;
   renderCard(currentCard(), true);
-  statusText.textContent = `回看第 ${feedState.cursor + 1} 条`;
+  statusText.textContent = `Viewing item ${feedState.cursor + 1} again.`;
   syncButtons();
 }
 
@@ -241,7 +241,7 @@ async function moveDown() {
   if (feedState.cursor >= 0 && feedState.cursor < feedState.history.length - 1) {
     feedState.cursor += 1;
     renderCard(currentCard(), true);
-    statusText.textContent = `继续浏览第 ${feedState.cursor + 1} 条`;
+    statusText.textContent = `Continuing to item ${feedState.cursor + 1}.`;
     syncButtons();
     return;
   }
@@ -251,26 +251,26 @@ async function moveDown() {
     feedState.history.push(nextCard);
     feedState.cursor = feedState.history.length - 1;
     renderCard(nextCard, true);
-    statusText.textContent = `下滑到第 ${feedState.cursor + 1} 条`;
+    statusText.textContent = `Swiped down to item ${feedState.cursor + 1}.`;
     syncButtons();
     return;
   }
 
   const current = currentCard();
   if (!current) {
-    statusText.textContent = "当前没有内容，请先点击随机重置。";
+    statusText.textContent = 'No content is loaded. Please click "Random Reset" first.';
     return;
   }
 
   feedState.loading = true;
   syncButtons();
-  statusText.textContent = "根据当前内容加载下一条...";
+  statusText.textContent = "Loading the next item from the current context...";
 
   try {
     const result = await requestMoreByCurrentCard();
     const data = result?.data;
     if (!result || !result.nextCard) {
-      statusText.textContent = (data && data.message) || "没有更多推荐了，请重置后继续。";
+      statusText.textContent = (data && data.message) || 'No more recommendations are available. Use "Random Reset" to continue.';
       return;
     }
 
@@ -281,9 +281,9 @@ async function moveDown() {
 
     const showDataset = (data && (data.dataset_label || datasetLabel(data.dataset_key))) || datasetLabel(datasetSelect.value);
     const showModel = (data && modelLabel(data.model_name)) || modelLabel(algoSelect.value);
-    statusText.textContent = `${showDataset} / ${showModel} 下滑到第 ${feedState.cursor + 1} 条`;
+    statusText.textContent = `${showDataset} / ${showModel} swiped down to item ${feedState.cursor + 1}.`;
   } catch (err) {
-    statusText.textContent = `下滑失败: ${err.message}`;
+    statusText.textContent = `Swipe-down failed: ${err.message}`;
   } finally {
     feedState.loading = false;
     syncButtons();

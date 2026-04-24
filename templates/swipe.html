@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>多数据集推荐 Demo - 上下滑页面</title>
+  <title>WebSim experimental platform</title>
   <link rel="stylesheet" href="/static/swipe.css">
 </head>
 <body>
@@ -11,19 +11,19 @@
     <header class="page-head">
       <div class="hero-copy">
         <p class="eyebrow">Recommendation Sandbox</p>
-        <h1>多数据集推荐滑动台</h1>
-        <p class="hero-desc">选择数据集与模型，像刷卡片一样快速浏览推荐内容。</p>
+        <h1>WebSim experimental platform</h1>
+        <p class="hero-desc">Choose a dataset and model, then browse recommendation cards with a swipe-style interaction.</p>
       </div>
-      <a href="/" class="back-link">返回首页网格页</a>
+      <a href="/" class="back-link">Back to the grid page</a>
     </header>
 
     <section class="swipe-layout">
       <aside class="left-controls panel">
-        <h2>参数面板</h2>
-        <p class="panel-tip">切换选项后会自动加载新的第一条推荐。</p>
+        <h2>Control Panel</h2>
+        <p class="panel-tip">Changing the dataset or model automatically loads a new first item.</p>
 
         <label class="control-box">
-          <span>数据集</span>
+          <span>Dataset</span>
           <select id="datasetSelect">
             <option value="ml1m">MovieLens-1M</option>
             <option value="amazon_all_beauty">Amazon All Beauty</option>
@@ -32,7 +32,7 @@
         </label>
 
         <label class="control-box">
-          <span>推荐模型</span>
+          <span>Recommendation Model</span>
           <select id="algoSelect">
             <option value="poprec">PopRec</option>
             <option value="bprmf">BPR-MF</option>
@@ -47,32 +47,32 @@
 
       <section class="center-panel panel">
         <div class="center-top">
-          <button id="resetBtn" type="button" class="action-btn wide-btn">随机重置</button>
-          <p class="hotkey-tip">键盘支持：↑ 上划 / ↓ 下划</p>
+          <button id="resetBtn" type="button" class="action-btn wide-btn">Random Reset</button>
+          <p class="hotkey-tip">Keyboard shortcuts: ↑ swipe up / ↓ swipe down</p>
         </div>
 
         <article id="swipeCard" class="swipe-card">
-          <img id="swipePoster" class="poster" src="" alt="推荐内容海报">
+          <img id="swipePoster" class="poster" src="" alt="Recommended content poster">
           <div class="content">
-            <h3 id="swipeTitle" class="title">加载中...</h3>
-            <p id="swipeDesc" class="desc">正在准备推荐内容</p>
+            <h3 id="swipeTitle" class="title">Loading...</h3>
+            <p id="swipeDesc" class="desc">Preparing recommended content</p>
           </div>
         </article>
 
         <div class="meta-row" aria-live="polite">
           <span id="datasetBadge" class="meta-chip">MovieLens-1M</span>
           <span id="modelBadge" class="meta-chip">SASRec</span>
-          <span id="indexBadge" class="meta-chip">第 0 条</span>
+          <span id="indexBadge" class="meta-chip">Item 0</span>
         </div>
 
-        <p id="statusText" class="status-text">加载中...</p>
+        <p id="statusText" class="status-text">Loading...</p>
       </section>
 
       <aside class="right-controls panel">
-        <h2>滑动操作</h2>
-        <p class="panel-tip">可点击按钮，也可直接使用方向键。</p>
-        <button id="upBtn" type="button" class="action-btn">上划</button>
-        <button id="downBtn" type="button" class="action-btn">下划</button>
+        <h2>Swipe Controls</h2>
+        <p class="panel-tip">Use the buttons or the keyboard arrow keys.</p>
+        <button id="upBtn" type="button" class="action-btn">Swipe Up</button>
+        <button id="downBtn" type="button" class="action-btn">Swipe Down</button>
       </aside>
     </section>
   </main>
